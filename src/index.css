@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  background: linear-gradient(140deg, #f8fafc 0%, #ffffff 56%, #e2e8f0 100%);
+  color: #0f172a;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ambient-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.ambient-grid::before,
+.ambient-grid::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 9999px;
+  z-index: -1;
+}
+
+.ambient-grid::before {
+  width: min(55vw, 780px);
+  height: min(55vw, 780px);
+  top: -280px;
+  left: -180px;
+  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0));
+}
+
+.ambient-grid::after {
+  width: min(48vw, 720px);
+  height: min(48vw, 720px);
+  right: -190px;
+  top: 160px;
+  background: radial-gradient(circle at center, rgba(212, 160, 23, 0.22), rgba(212, 160, 23, 0));
+}
+
+.glass-surface {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
+  backdrop-filter: blur(18px);
+}
+
+.soft-outline {
+  border: 1px solid rgba(37, 99, 235, 0.35);
+}
+
+.golden-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0) 0%, rgba(37, 99, 235, 0.6) 45%, rgba(212, 160, 23, 0.65) 55%, rgba(37, 99, 235, 0) 100%);
+}
+
+.ticker-track {
+  animation: tickerScroll 42s linear infinite;
+}
+
+.page-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.page-shell > section {
+  display: grid;
+  gap: 1.25rem;
+  animation: pageEnter 380ms ease-out;
+}
+
+.page-shell > section > * {
+  animation: sectionRise 420ms ease-out;
+}
+
+.page-shell > section > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.page-shell > section > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sectionRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell > section,
+  .page-shell > section > * {
+    animation: none;
+  }
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+
+
+/* Global responsive safety */
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+}
+
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  display: block;
+}
+
+/* Smooth page entrance */
+.page-transition {
+  animation: pageRise 420ms ease-out;
+}
+
+@keyframes pageRise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Generic shimmer skeleton */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  animation: shimmerMove 1.8s infinite;
+}
+
+@keyframes shimmerMove {
+  100% { transform: translateX(100%); }
+}
+
+/* Ultra-wide optimization */
+@media (min-width: 2560px) {
+  html {
+    font-size: 19px;
+  }
+}
+
+/* Smart TV optimization */
+@media (min-width: 3200px) {
+  html {
+    font-size: 22px;
+  }
+}
+
+/* Better spacing on very small devices */
+@media (max-width: 380px) {
+  .xs-tight {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
