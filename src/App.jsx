@@ -14,6 +14,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const AdminLayoutPage = lazy(() => import('./pages/admin/AdminLayoutPage'))
+const AdminOverviewPage = lazy(() => import('./pages/admin/AdminOverviewPage'))
 const UsersPage = lazy(() => import('./pages/admin/UsersPage'))
 const KycPage = lazy(() => import('./pages/admin/KycPage'))
 const BranchesPage = lazy(() => import('./pages/admin/BranchesPage'))
@@ -47,7 +48,8 @@ function App() {
 
           <Route element={<ProtectedRoute role="admin" />}>
             <Route path="/admin" element={<AdminLayoutPage />}>
-              <Route index element={<Navigate to="users" replace />} />
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<AdminOverviewPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="kyc" element={<KycPage />} />
               <Route path="branches" element={<BranchesPage />} />

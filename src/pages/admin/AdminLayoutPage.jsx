@@ -4,6 +4,7 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight, HiMenuAlt2, HiOutlineX } fro
 import { FiActivity, FiFileText, FiMapPin, FiShield, FiUsers } from 'react-icons/fi'
 
 const items = [
+  { to: '/admin/overview', label: 'Overview', icon: FiActivity },
   { to: '/admin/users', label: 'Users', icon: FiUsers },
   { to: '/admin/kyc', label: 'KYC Queue', icon: FiShield },
   { to: '/admin/branches', label: 'Branches', icon: FiMapPin },

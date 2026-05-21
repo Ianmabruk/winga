@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-4">
-              <WingaForexLogo size="sm" />
+              <WingaForexLogo />
             </div>
             <p className="text-sm leading-relaxed text-slate-400 mt-4">
               Tanzania's most trusted foreign exchange bureau. Real-time rates,

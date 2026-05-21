@@ -25,7 +25,7 @@ export default function Navbar() {
 	return (
 		<header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-xl shadow-glass-lg border-b border-skybrand-100' : 'bg-white/80 backdrop-blur-xl'}`}>
 			<div className="mx-auto flex w-[min(1440px,96vw)] items-center justify-between px-4 py-3 md:py-4">
-				<WingaForexLogo size="sm" />
+				<WingaForexLogo />
 
 				<nav className="hidden lg:flex items-center gap-1">
 					{links.map(({ to, label, end }) => (
