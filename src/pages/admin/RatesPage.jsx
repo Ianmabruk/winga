@@ -30,7 +30,7 @@ export default function RatesPage() {
       <article className="rounded-2xl border border-white/50 bg-white/80 p-4 shadow-glass">
         <h2 className="font-display text-2xl">Rate Management</h2>
         <form
-          className="mt-4 grid gap-3 md:grid-cols-4"
+          className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4"
           onSubmit={(event) => {
             event.preventDefault()
             updateMutation.mutate()
@@ -41,8 +41,11 @@ export default function RatesPage() {
           </select>
           <input className="rounded-xl border border-skybrand-200 px-3 py-2" placeholder="Buy" value={rateForm.buy} onChange={(event) => setRateForm((prev) => ({ ...prev, buy: event.target.value }))} />
           <input className="rounded-xl border border-skybrand-200 px-3 py-2" placeholder="Sell" value={rateForm.sell} onChange={(event) => setRateForm((prev) => ({ ...prev, sell: event.target.value }))} />
-          <button className="rounded-xl bg-skybrand-500 px-4 py-2 text-sm font-semibold text-white">Publish</button>
+          <button disabled={updateMutation.isPending} className="rounded-xl bg-skybrand-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{updateMutation.isPending ? 'Publishing' : 'Publish'}</button>
         </form>
+        {(updateMutation.isError || historyQuery.isError) && (
+          <p className="mt-3 text-sm text-rose-600">Unable to load or publish rates right now.</p>
+        )}
       </article>
 
       <article className="overflow-x-auto rounded-2xl border border-skybrand-100 bg-white/80">

@@ -16,7 +16,7 @@ export default function FloatingWhatsApp() {
   }
 
   return (
-    <div className="fixed bottom-6 right-5 z-[9999] flex flex-col items-end gap-3">
+    <div className="fixed bottom-[6.75rem] right-4 z-[50] flex flex-col items-end gap-3 md:bottom-6 md:right-5 lg:z-[55]">
       {/* Popup card */}
       <AnimatePresence>
         {open && (
@@ -25,7 +25,8 @@ export default function FloatingWhatsApp() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="w-72 rounded-2xl bg-white shadow-glass-lg border border-skybrand-100 overflow-hidden"
+            id="whatsapp-panel"
+            className="w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-skybrand-100 bg-white shadow-glass-lg"
           >
             {/* Header */}
             <div className="bg-[#25D366] px-4 py-3 flex items-center justify-between">
@@ -38,7 +39,7 @@ export default function FloatingWhatsApp() {
                   <p className="text-white/80 text-xs">Typically replies instantly</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white transition">
+              <button onClick={() => setOpen(false)} className="rounded-md text-white/80 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70">
                 <FiX size={18} />
               </button>
             </div>
@@ -56,6 +57,7 @@ export default function FloatingWhatsApp() {
                 value={msg}
                 onChange={(e) => setMsg(e.target.value)}
                 rows={2}
+                aria-label="WhatsApp message"
                 className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#25D366] transition"
                 placeholder="Type your message…"
               />
@@ -78,8 +80,10 @@ export default function FloatingWhatsApp() {
         whileTap={{ scale: 0.95 }}
         animate={{ boxShadow: open ? '0 0 0 0 rgba(37,211,102,0)' : ['0 0 0 0 rgba(37,211,102,0.4)', '0 0 0 14px rgba(37,211,102,0)'] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="h-14 w-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-xl text-white"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/25"
         aria-label="Chat on WhatsApp"
+        aria-expanded={open}
+        aria-controls="whatsapp-panel"
       >
         {open ? <FiX size={22} /> : <FaWhatsapp size={26} />}
       </motion.button>

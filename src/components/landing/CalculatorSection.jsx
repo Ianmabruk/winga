@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { FiRepeat, FiArrowRight } from 'react-icons/fi'
 import { useForexStore } from '../../store/useForexStore'
 import { getFlagUrl } from '../../data/flags'
@@ -28,7 +29,7 @@ function convertAmount(amount, from, to, ratesData) {
   return (tzs / parseFloat(rt.selling_rate)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })
 }
 
-export default function CalculatorSection() {
+export default function CalculatorSection({ compact = false }) {
   const storeData = useForexStore((s) => s.ratesData)
   const ratesData = storeData && storeData.length ? storeData : buildFallbackRatesData()
   const codes = ['TZS', ...ratesData.map((r) => r.currency_code)].filter((c, i, a) => a.indexOf(c) === i)
@@ -48,7 +49,7 @@ export default function CalculatorSection() {
   }
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-br from-skybrand-950 via-skybrand-900 to-navysoft relative overflow-hidden">
+    <section className={`relative overflow-hidden bg-gradient-to-br from-skybrand-950 via-skybrand-900 to-navysoft ${compact ? 'py-14 md:py-16' : 'py-16 md:py-20'}`}>
       {/* BG blobs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-skybrand-600/20 blur-3xl" />
@@ -56,28 +57,33 @@ export default function CalculatorSection() {
       </div>
 
       <div className="relative mx-auto w-[min(1440px,96vw)] px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className={`grid items-center ${compact ? 'gap-8 lg:grid-cols-[0.85fr_1fr]' : 'gap-12 lg:grid-cols-2'}`}>
 
           {/* Left: text */}
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <p className="text-xs font-bold uppercase tracking-widest text-accent-400 mb-3">Smart Calculator</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Currency Converter</h2>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-accent-400">Smart Calculator</p>
+            <h2 className="mb-4 text-3xl font-extrabold text-white md:text-4xl">{compact ? 'Quick Converter' : 'Currency Converter'}</h2>
             <p className="text-skybrand-300 leading-relaxed mb-6">
-              Get instant conversion between 25+ currencies using Winga's live rates.
+              Get instant conversion between major currencies using Winga's live rates.
               Real-time, accurate, and transparent.
             </p>
             <ul className="grid gap-2 text-sm text-skybrand-300">
-              {['Live rates updated every 15 seconds','TZS-based accurate calculations','No hidden fees or spreads shown separately'].map((t) => (
+              {['Live rates updated every 15 seconds', 'TZS-based accurate calculations', 'Simple, thumb-friendly conversion flow'].map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent-400 shrink-0" />{t}
                 </li>
               ))}
             </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/calculator" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15">
+                Open Full Calculator <FiArrowRight size={14} />
+              </Link>
+            </div>
           </motion.div>
 
           {/* Right: calculator card */}
           <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-glass-lg">
+            className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-glass-lg backdrop-blur-xl">
 
             <h3 className="text-white font-bold text-lg mb-5">Convert Currency</h3>
 

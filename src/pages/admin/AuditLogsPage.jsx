@@ -10,6 +10,7 @@ export default function AuditLogsPage() {
   return (
     <div className="grid gap-4">
       <h2 className="font-display text-2xl">Audit Log Explorer</h2>
+      {query.isError ? <p className="text-sm text-rose-600">Unable to load audit logs right now.</p> : null}
       <article className="overflow-x-auto rounded-2xl border border-skybrand-100 bg-white/80">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead>

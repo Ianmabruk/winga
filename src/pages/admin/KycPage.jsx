@@ -17,6 +17,7 @@ export default function KycPage() {
   return (
     <div className="grid gap-4">
       <h2 className="font-display text-2xl">KYC Verification Queue</h2>
+      {query.isError ? <p className="text-sm text-rose-600">Unable to load KYC queue right now.</p> : null}
       <AdminTable
         columns={[
           { key: 'full_name', label: 'Name' },
@@ -27,8 +28,8 @@ export default function KycPage() {
         rows={query.data || []}
         actions={(row) => (
           <div className="flex gap-2">
-            <button onClick={() => updateMutation.mutate({ id: row.id, status: 'approved' })} className="rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Approve</button>
-            <button onClick={() => updateMutation.mutate({ id: row.id, status: 'rejected' })} className="rounded-lg bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700">Reject</button>
+            <button disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ id: row.id, status: 'approved' })} className="rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">Approve</button>
+            <button disabled={updateMutation.isPending} onClick={() => updateMutation.mutate({ id: row.id, status: 'rejected' })} className="rounded-lg bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-60">Reject</button>
           </div>
         )}
       />

@@ -88,11 +88,11 @@ export default function MobileBottomNav() {
         animate={{ opacity: visible ? 1 : 0.9, y: visible ? 0 : 54 }}
         exit={{ opacity: 0, y: 110 }}
         transition={{ duration: 0.26 }}
-        className="fixed inset-x-0 bottom-3 z-[60] lg:hidden"
+        className="fixed inset-x-0 bottom-2 z-[60] lg:hidden"
         aria-label="Primary mobile navigation"
       >
         <div className="pointer-events-auto mx-auto grid w-[min(640px,94vw)] grid-cols-[1fr_auto_1fr] items-end gap-2">
-          <div className="rounded-[26px] border border-skybrand-100/90 bg-white/74 p-1.5 shadow-[0_14px_40px_rgba(3,105,161,0.22)] backdrop-blur-xl">
+          <div className="rounded-[24px] border border-skybrand-100/90 bg-white/72 p-1 shadow-[0_10px_30px_rgba(3,105,161,0.18)] backdrop-blur-xl">
             <div className="grid grid-cols-2 gap-1">
               {leftItems.map((item) => (
                 <DockItem key={item.to} {...item} />
@@ -104,7 +104,7 @@ export default function MobileBottomNav() {
             {({ isActive }) => (
               <motion.div
                 whileTap={{ scale: 0.92 }}
-                className={`relative mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-skybrand-100/90 bg-gradient-to-br from-skybrand-500 to-skybrand-700 text-white shadow-[0_0_0_8px_rgba(224,242,254,0.65),0_16px_40px_rgba(2,132,199,0.46)] ${
+                className={`relative mb-3 flex h-[3.8rem] w-[3.8rem] items-center justify-center rounded-full border border-skybrand-100/90 bg-gradient-to-br from-skybrand-500 to-skybrand-700 text-white shadow-[0_0_0_8px_rgba(224,242,254,0.6),0_14px_34px_rgba(2,132,199,0.36)] ${
                   isActive ? 'ring-4 ring-cyan-200/70' : ''
                 }`}
                 aria-label="Home"
@@ -114,7 +114,7 @@ export default function MobileBottomNav() {
             )}
           </NavLink>
 
-          <div className="rounded-[26px] border border-skybrand-100/90 bg-white/74 p-1.5 shadow-[0_14px_40px_rgba(3,105,161,0.22)] backdrop-blur-xl">
+          <div className="rounded-[24px] border border-skybrand-100/90 bg-white/72 p-1 shadow-[0_10px_30px_rgba(3,105,161,0.18)] backdrop-blur-xl">
             <div className="grid grid-cols-2 gap-1">
               {rightItems.map((item) => (
                 <DockItem key={item.to} {...item} />

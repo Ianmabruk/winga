@@ -18,7 +18,7 @@ function HeroRateCard({ code, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 + index * 0.1 }}
       className={`bg-white/70 backdrop-blur-xl border border-skybrand-200/60 rounded-2xl p-4 shadow-glass
-                  hover:shadow-glass-lg hover:-translate-y-1 transition-all duration-300 ${index % 2 === 1 ? 'animate-floaty2' : 'animate-floaty'}`}
+                  transition-shadow duration-200 hover:shadow-glass ${index % 2 === 1 ? 'motion-safe:animate-floaty2' : 'motion-safe:animate-floaty'}`}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function HeroSection() {
             {/* Badge */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="inline-flex items-center gap-2 rounded-full border border-skybrand-200 bg-skybrand-50 px-4 py-1.5 text-xs font-semibold text-skybrand-700 mb-6">
-              <span className="h-2 w-2 rounded-full bg-market-up animate-pulseRate" />
+              <span className="h-2 w-2 rounded-full bg-market-up/80" />
               Live Rates Updated Every 15 Seconds
             </motion.div>
 
@@ -93,7 +93,7 @@ export default function HeroSection() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="flex flex-wrap gap-3 mb-10">
               <Link to="/live-rates"
-                className="flex items-center gap-2 rounded-2xl bg-skybrand-600 px-7 py-3.5 text-sm font-bold text-white shadow-glass hover:bg-skybrand-700 hover:shadow-glow-sky hover:-translate-y-0.5 transition-all duration-200">
+                className="flex items-center gap-2 rounded-2xl bg-skybrand-600 px-7 py-3.5 text-sm font-bold text-white shadow-glass transition-colors duration-200 hover:bg-skybrand-700">
                 View Live Rates <FiArrowRight size={16} />
               </Link>
               <Link to="/contact"
@@ -124,7 +124,7 @@ export default function HeroSection() {
               <img
                 src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80"
                 alt="Modern blue financial district skyline"
-                className="h-[220px] w-full object-cover object-center transition duration-700 group-hover:scale-105 sm:h-[260px]"
+                className="h-[220px] w-full object-cover object-center transition duration-500 group-hover:scale-[1.02] sm:h-[260px]"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-skybrand-950/90 via-skybrand-900/45 to-transparent" />

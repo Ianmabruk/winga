@@ -7,7 +7,7 @@ import { getFlagUrl } from '../../data/flags'
 import { formatRate } from '../../utils/formatters'
 import { buildFallbackRatesData } from '../../data/currencies'
 
-const SHOW = ['USD','EUR','GBP','AED','KES','ZAR','INR','CNY']
+const SHOW = ['USD','EUR','GBP','AED','KES','ZAR']
 
 export default function RatesSection() {
   useRates()
@@ -17,18 +17,18 @@ export default function RatesSection() {
 
   const data = (ratesData && ratesData.length ? ratesData : buildFallbackRatesData())
     .filter((r) => SHOW.includes(r.currency_code))
-    .slice(0, 8)
+    .slice(0, 6)
 
   return (
-    <section className="py-16 md:py-20 bg-white">
+    <section className="py-14 md:py-16 bg-white">
       <div className="mx-auto w-[min(1440px,96vw)] px-4">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-accent-500 mb-2">Real-Time Data</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-skybrand-950">Live Exchange Rates</h2>
-            <p className="text-slate-500 mt-2 text-sm">All rates shown in Tanzanian Shillings (TZS)</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-accent-500">Real-Time Data</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-skybrand-950">Main Exchange Rates</h2>
+            <p className="mt-2 max-w-xl text-sm text-slate-500">A calm snapshot of the most watched currencies in Tanzanian Shillings (TZS).</p>
           </div>
           {lastUpdated && (
             <div className="flex items-center gap-2 rounded-xl bg-market-up/10 border border-market-up/20 px-3.5 py-2 text-xs font-semibold text-market-up">
@@ -39,7 +39,7 @@ export default function RatesSection() {
         </div>
 
         {/* Cards grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
           {data.map((r, i) => {
             const code = r.currency_code
             const changed = changedCurrencies.includes(code)
@@ -91,9 +91,12 @@ export default function RatesSection() {
           })}
         </div>
 
-        <div className="text-center">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="rounded-2xl border border-skybrand-100 bg-skybrand-50/70 px-4 py-2 text-xs font-semibold text-slate-600">
+            Live pulse, favorites, and search are available in the full market board.
+          </div>
           <Link to="/live-rates"
-            className="inline-flex items-center gap-2 rounded-2xl bg-skybrand-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-skybrand-700 hover:shadow-glow-sky transition-all duration-200">
+            className="inline-flex items-center gap-2 rounded-2xl bg-skybrand-600 px-6 py-3 text-sm font-bold text-white hover:bg-skybrand-700 hover:shadow-glow-sky transition-all duration-200">
             View All Currencies <FiArrowRight size={15} />
           </Link>
         </div>

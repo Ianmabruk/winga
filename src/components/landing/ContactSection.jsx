@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { FiMapPin, FiPhone, FiMail, FiClock, FiSend, FiCheck } from 'react-icons/fi'
 
-export default function ContactSection() {
+export default function ContactSection({ compact = false }) {
   const [sent, setSent] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
 
@@ -12,6 +13,30 @@ export default function ContactSection() {
     setSent(true)
     setTimeout(() => setSent(false), 5000)
     setForm({ name: '', email: '', phone: '', message: '' })
+  }
+
+  if (compact) {
+    return (
+      <section id="contact" className="py-14 md:py-16 bg-skybrand-50/40">
+        <div className="mx-auto w-[min(1100px,96vw)] px-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-[2rem] border border-skybrand-100 bg-white/85 p-6 shadow-card backdrop-blur-sm md:p-8">
+            <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-accent-500">Get In Touch</p>
+                <h2 className="text-3xl font-extrabold text-skybrand-950 md:text-4xl">Talk to Winga without the clutter</h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">Need branch details, live assistance, or transaction guidance? Use the quickest channel for what you need.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <a href="tel:+255000000000" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Call Support</a>
+                <a href="mailto:info@wingaforex.co.tz" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Email Us</a>
+                <Link to="/contact" className="rounded-2xl bg-skybrand-600 px-4 py-4 text-center text-sm font-semibold text-white transition hover:bg-skybrand-700">Open Contact Page</Link>
+                <Link to="/live-rates" className="rounded-2xl border border-skybrand-200 bg-white px-4 py-4 text-center text-sm font-semibold text-skybrand-700 transition hover:bg-skybrand-50">View Live Rates</Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    )
   }
 
   return (

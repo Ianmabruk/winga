@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
 import { useForexStore } from '../store/useForexStore'
 import { getFlagUrl } from '../data/flags'
@@ -7,13 +7,6 @@ import { formatRate } from '../utils/formatters'
 export default function LiveTicker() {
   const ratesData = useForexStore((state) => state.ratesData)
   const previousRatesMap = useForexStore((state) => state.previousRatesMap)
-  const [flash, setFlash] = useState(false)
-
-  useEffect(() => {
-    setFlash(true)
-    const t = setTimeout(() => setFlash(false), 700)
-    return () => clearTimeout(t)
-  }, [ratesData])
 
   const items = useMemo(() => {
     const visible = ratesData.slice(0, 12) // show top 12 currencies
@@ -32,9 +25,7 @@ export default function LiveTicker() {
 
   return (
     <div
-      className={`w-full overflow-hidden rounded-2xl border border-cyanice bg-white/90 ${
-        flash ? 'animate-tickerFlash' : ''
-      }`}
+      className="w-full overflow-hidden rounded-2xl border border-cyanice bg-white/90"
       role="marquee"
       aria-label="Live forex ticker"
     >
