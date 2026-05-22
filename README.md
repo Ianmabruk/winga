@@ -24,6 +24,26 @@ npm run build
 npm run preview
 ```
 
+## Netlify Deployment
+
+- Base directory: `burea`
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Node version: `20`
+- Required environment variables:
+	- `VITE_WINGA_API_BASE=https://forex.wingaforex.co.tz`
+	- `VITE_WINGA_API_TOKEN=...`
+	- `VITE_API_URL=https://your-api-host` only if user/admin analytics are enabled on a separate backend
+
+Netlify SPA routing and cache headers are configured in `netlify.toml` and `public/_headers`.
+
+If changes do not appear after deploy:
+
+- Verify Netlify is connected to the `main` branch of the GitHub repo.
+- Verify the base directory is `burea` and not the repository root.
+- Trigger a clear-cache deploy in Netlify.
+- Confirm the latest build uses the newest commit SHA shown in Netlify deploy logs.
+
 ## Environment
 
 - `VITE_API_URL` backend URL, default `http://localhost:4000`

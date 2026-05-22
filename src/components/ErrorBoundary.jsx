@@ -12,6 +12,17 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     console.error('[ErrorBoundary]', error, info)
+    if (typeof window !== 'undefined') {
+      window.__WING_DEBUG__ = window.__WING_DEBUG__ || { events: [] }
+      window.__WING_DEBUG__.events.push({
+        event: 'error-boundary',
+        payload: {
+          message: error?.message,
+          componentStack: info?.componentStack,
+        },
+        at: new Date().toISOString(),
+      })
+    }
   }
 
   render() {

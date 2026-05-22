@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
+import RouteDebugProbe from './components/RouteDebugProbe'
 import './index.css'
 import App from './App.jsx'
+import { initRuntimeDebug } from './utils/runtimeDebug'
+
+initRuntimeDebug()
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +28,7 @@ createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <RouteDebugProbe />
           <App />
         </BrowserRouter>
       </QueryClientProvider>

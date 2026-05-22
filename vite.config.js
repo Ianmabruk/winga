@@ -1,8 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const buildId = process.env.COMMIT_REF || process.env.GITHUB_SHA || `local-${Date.now()}`
+const buildTime = new Date().toISOString()
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(buildId),
+    __APP_BUILD_TIME__: JSON.stringify(buildTime),
+  },
   server: {
     port: 5173,
     proxy: {
@@ -20,6 +27,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    target: 'es2019',
+    cssTarget: 'chrome88',
     rollupOptions: {
       output: {
         manualChunks(id) {
