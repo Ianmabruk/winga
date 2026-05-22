@@ -51,7 +51,7 @@ export default function UserDashboardPage() {
             <Link to="/calculator" className="rounded-xl bg-skybrand-600 px-4 py-2 text-sm font-semibold text-white">
               Open Calculator
             </Link>
-            <Link to="/live-rates" className="rounded-xl border border-skybrand-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
+            <Link to="/rates" className="rounded-xl border border-skybrand-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
               View Live Rates
             </Link>
           </div>

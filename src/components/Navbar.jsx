@@ -6,7 +6,8 @@ import WingaForexLogo from './WingaForexLogo'
 
 const links = [
 	{ to: '/', label: 'Home', end: true },
-	{ to: '/live-rates', label: 'Rates' },
+	{ to: '/market', label: 'Market' },
+	{ to: '/rates', label: 'Rates' },
 	{ to: '/services', label: 'Services' },
 	{ to: '/about', label: 'About' },
 	{ to: '/contact', label: 'Contact' },
@@ -44,7 +45,7 @@ export default function Navbar() {
 							{label}
 						</NavLink>
 					))}
-					<Link to="/live-rates" className="ml-1 rounded-xl bg-skybrand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-skybrand-700 transition-all duration-200">
+					<Link to="/rates" className="ml-1 rounded-xl bg-skybrand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-skybrand-700 transition-all duration-200">
 						View Rates
 					</Link>
 				</nav>

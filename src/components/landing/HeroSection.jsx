@@ -92,7 +92,7 @@ export default function HeroSection() {
             {/* CTAs */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="flex flex-wrap gap-3 mb-10">
-              <Link to="/live-rates"
+              <Link to="/rates"
                 className="flex items-center gap-2 rounded-2xl bg-skybrand-600 px-7 py-3.5 text-sm font-bold text-white shadow-glass transition-colors duration-200 hover:bg-skybrand-700">
                 View Live Rates <FiArrowRight size={16} />
               </Link>

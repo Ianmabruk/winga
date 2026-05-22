@@ -30,7 +30,7 @@ export default function ContactSection({ compact = false }) {
                 <a href="tel:+255000000000" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Call Support</a>
                 <a href="mailto:info@wingaforex.co.tz" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Email Us</a>
                 <Link to="/contact" className="rounded-2xl bg-skybrand-600 px-4 py-4 text-center text-sm font-semibold text-white transition hover:bg-skybrand-700">Open Contact Page</Link>
-                <Link to="/live-rates" className="rounded-2xl border border-skybrand-200 bg-white px-4 py-4 text-center text-sm font-semibold text-skybrand-700 transition hover:bg-skybrand-50">View Live Rates</Link>
+                <Link to="/rates" className="rounded-2xl border border-skybrand-200 bg-white px-4 py-4 text-center text-sm font-semibold text-skybrand-700 transition hover:bg-skybrand-50">View Live Rates</Link>
               </div>
             </div>
           </motion.div>

@@ -11,7 +11,8 @@ import { useBranches } from '../hooks/useBranches'
 
 const navLinks = [
   { to: '/', label: 'Home', end: true },
-  { to: '/live-rates', label: 'Rates' },
+  { to: '/market', label: 'Market' },
+  { to: '/rates', label: 'Rates' },
   { to: '/calculator', label: 'Calculator' },
   { to: '/services', label: 'Services' },
   { to: '/about', label: 'About' },
@@ -62,7 +63,7 @@ export default function AppShell() {
                 Login
               </Link>
             )}
-            <Link to="/live-rates" className="rounded-xl bg-skybrand-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-skybrand-700 transition-all duration-200">
+            <Link to="/rates" className="rounded-xl bg-skybrand-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-skybrand-700 transition-all duration-200">
               View Rates
             </Link>
           </div>

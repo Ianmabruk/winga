@@ -5,8 +5,8 @@ import {
   FiActivity,
   FiBarChart2,
   FiBell,
+  FiBriefcase,
   FiHome,
-  FiMail,
   FiRepeat,
   FiSettings,
 } from 'react-icons/fi'
@@ -58,15 +58,15 @@ export default function MobileBottomNav() {
   const leftItems = useMemo(
     () => [
       { to: '/calculator', label: 'Calc', Icon: FiRepeat },
-      { to: '/services', label: 'Market', Icon: FiBarChart2 },
+      { to: '/market', label: 'Market', Icon: FiBarChart2 },
     ],
     [],
   )
 
   const rightItems = useMemo(() => {
     const items = [
-      { to: '/live-rates', label: 'Rates', Icon: FiActivity },
-      { to: '/contact', label: 'Contact', Icon: FiMail },
+      { to: '/rates', label: 'Rates', Icon: FiActivity },
+      { to: '/services', label: 'Services', Icon: FiBriefcase },
       { to: '/faqs', label: 'Alerts', Icon: FiBell },
     ]
 

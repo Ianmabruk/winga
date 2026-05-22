@@ -95,7 +95,7 @@ export default function RatesSection() {
           <div className="rounded-2xl border border-skybrand-100 bg-skybrand-50/70 px-4 py-2 text-xs font-semibold text-slate-600">
             Live pulse, favorites, and search are available in the full market board.
           </div>
-          <Link to="/live-rates"
+          <Link to="/rates"
             className="inline-flex items-center gap-2 rounded-2xl bg-skybrand-600 px-6 py-3 text-sm font-bold text-white hover:bg-skybrand-700 hover:shadow-glow-sky transition-all duration-200">
             View All Currencies <FiArrowRight size={15} />
           </Link>

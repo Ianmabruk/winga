@@ -4,7 +4,8 @@ import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi'
 import WingaForexLogo from './WingaForexLogo'
 
 const quickLinks = [
-  { to: '/live-rates', label: 'Live Rates' },
+  { to: '/market', label: 'Market' },
+  { to: '/rates', label: 'Rates' },
   { to: '/calculator', label: 'Calculator' },
   { to: '/services', label: 'Services' },
   { to: '/about', label: 'About Us' },

@@ -7,6 +7,7 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const MarketPage = lazy(() => import('./pages/MarketPage'))
 const LiveRatesPage = lazy(() => import('./pages/LiveRatesPage'))
 const CalculatorPage = lazy(() => import('./pages/CalculatorPage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
@@ -34,7 +35,9 @@ function App() {
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/live-rates" element={<LiveRatesPage />} />
+          <Route path="/market" element={<MarketPage />} />
+          <Route path="/rates" element={<LiveRatesPage />} />
+          <Route path="/live-rates" element={<Navigate to="/rates" replace />} />
           <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/about" element={<AboutPage />} />
