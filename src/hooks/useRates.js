@@ -5,6 +5,16 @@ import { useForexStore } from '../store/useForexStore'
 
 const REFRESH_INTERVAL = Number(import.meta.env.VITE_APP_REFRESH_INTERVAL) || 15_000
 
+const getEffectiveRefreshInterval = () => {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection
+  if (!conn) return REFRESH_INTERVAL
+  if (conn.saveData) return Math.max(REFRESH_INTERVAL, 30_000)
+  if (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g') {
+    return Math.max(REFRESH_INTERVAL, 30_000)
+  }
+  return REFRESH_INTERVAL
+}
+
 /**
  * Real-time exchange rates from Winga API.
  * - Auto-refreshes every 15 seconds
@@ -21,7 +31,7 @@ export const useRates = () => {
     queryKey: ['rates', branchName],
     queryFn: () => fetchRates(branchName),
     enabled: !!branchName,
-    refetchInterval: REFRESH_INTERVAL,
+    refetchInterval: getEffectiveRefreshInterval(),
     refetchIntervalInBackground: false, // ⏸ pause when tab inactive, ▶ resume on focus
     staleTime: 5_000,
     gcTime: 60_000,

@@ -1,10 +1,20 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FiSearch, FiX } from 'react-icons/fi'
 import { useForexStore } from '../store/useForexStore'
 
 export default function SearchBar({ placeholder = 'Search currency…', className = '' }) {
   const { searchQuery, setSearchQuery } = useForexStore()
   const inputRef = useRef(null)
+  const [localQuery, setLocalQuery] = useState(searchQuery)
+
+  useEffect(() => {
+    setLocalQuery(searchQuery)
+  }, [searchQuery])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(localQuery), 180)
+    return () => clearTimeout(timer)
+  }, [localQuery, setSearchQuery])
 
   return (
     <div className={`relative flex items-center ${className}`}>
@@ -12,15 +22,16 @@ export default function SearchBar({ placeholder = 'Search currency…', classNam
       <input
         ref={inputRef}
         type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        value={localQuery}
+        onChange={(e) => setLocalQuery(e.target.value)}
         placeholder={placeholder}
         aria-label="Search currencies"
         className="w-full rounded-xl border border-skybrand-200 bg-white/90 py-2.5 pl-9 pr-8 text-sm text-slate-800 outline-none transition focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-200"
       />
-      {searchQuery && (
+      {localQuery && (
         <button
           onClick={() => {
+            setLocalQuery('')
             setSearchQuery('')
             inputRef.current?.focus()
           }}

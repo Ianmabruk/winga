@@ -6,43 +6,31 @@ const services = [
     icon: FiDollarSign,
     title: 'Currency Exchange',
     desc: 'Buy and sell foreign currencies at the most competitive rates in Arusha. Instant over-the-counter service.',
-    color: 'from-skybrand-500 to-skybrand-700',
-    bg: 'bg-skybrand-50',
   },
   {
     icon: FiSend,
     title: 'International Transfers',
     desc: 'Send money internationally with ease. Fast, secure, and reliable cross-border transfers.',
-    color: 'from-accent-400 to-accent-600',
-    bg: 'bg-orange-50',
   },
   {
     icon: FiGlobe,
     title: 'Travel Money',
     desc: 'Get the best travel currency before your trip. Wide selection of foreign notes available.',
-    color: 'from-emerald-500 to-emerald-700',
-    bg: 'bg-emerald-50',
   },
   {
     icon: FiBriefcase,
     title: 'Business Forex Solutions',
     desc: 'Tailored forex solutions for businesses. Bulk currency purchases and corporate accounts.',
-    color: 'from-purple-500 to-purple-700',
-    bg: 'bg-purple-50',
   },
   {
     icon: FiMonitor,
     title: 'Online Rate Monitoring',
     desc: 'Track live exchange rates 24/7 on our platform. Set alerts for your preferred rates.',
-    color: 'from-cyan-500 to-cyan-700',
-    bg: 'bg-cyan-50',
   },
   {
     icon: FiCreditCard,
     title: 'Corporate Transactions',
     desc: 'Enterprise-grade forex services for corporations. Dedicated account managers and priority service.',
-    color: 'from-rose-500 to-rose-700',
-    bg: 'bg-rose-50',
   },
 ]
 
@@ -59,17 +47,17 @@ export default function ServicesSection() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map(({ icon: Icon, title, desc, color, bg }, i) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map(({ icon: Icon, title, desc }, i) => (
             <motion.div key={title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
               whileHover={{ y: -6 }}
-              className={`group ${bg} border border-slate-200/80 rounded-2xl p-6 shadow-card hover:shadow-glass-lg transition-all duration-300`}
+              className="group rounded-3xl border border-skybrand-100 bg-white/80 p-6 shadow-[0_12px_32px_rgba(8,47,73,0.09)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_42px_rgba(2,132,199,0.18)]"
             >
-              <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-white shadow-md mb-4 group-hover:scale-110 transition-transform duration-300`}>
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-skybrand-100 bg-skybrand-50 text-skybrand-700 transition-transform duration-300 group-hover:scale-105">
                 <Icon size={20} />
               </div>
               <h3 className="text-base font-bold text-skybrand-950 mb-2">{title}</h3>

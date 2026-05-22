@@ -61,7 +61,7 @@ export default function HeroSection() {
       </div>
 
       <div className="relative mx-auto w-[min(1440px,96vw)] px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid items-center gap-8 lg:grid-cols-[1.04fr_1fr] lg:gap-12">
 
           {/* Left: text */}
           <div>
@@ -74,7 +74,7 @@ export default function HeroSection() {
 
             {/* Headline */}
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="text-4xl md:text-5xl xl:text-6xl font-extrabold leading-[1.1] text-skybrand-950 mb-5">
+              className="mb-5 text-[clamp(2rem,6vw,4.25rem)] font-extrabold leading-[1.05] text-skybrand-950">
               Your Trusted Partner In{' '}
               <span className="relative">
                 <span className="text-skybrand-600">Global Currency</span>
@@ -113,8 +113,28 @@ export default function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right: floating rate cards */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Right: cinematic finance visual + floating rate cards */}
+          <div className="grid gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="group relative overflow-hidden rounded-3xl border border-skybrand-100 bg-slate-900"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80"
+                alt="Modern blue financial district skyline"
+                className="h-[220px] w-full object-cover object-center transition duration-700 group-hover:scale-105 sm:h-[260px]"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-skybrand-950/90 via-skybrand-900/45 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/25 bg-white/12 p-3 backdrop-blur-lg">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-skybrand-100">Arusha Forex Desk</p>
+                <p className="mt-1 text-sm font-semibold text-white">Live trading displays and premium bureau service environment</p>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-2 gap-4">
             {heroRates.map((code, i) => (
               <HeroRateCard key={code} code={code} index={i} />
             ))}
@@ -131,6 +151,7 @@ export default function HeroSection() {
                 ))}
               </div>
             </motion.div>
+          </div>
           </div>
         </div>
       </div>

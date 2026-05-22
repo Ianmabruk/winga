@@ -1,15 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: Inter, sans-serif;
+  font-family: Inter, Manrope, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-size: clamp(14px, 0.44vw + 13px, 19px);
 }
 
 * {
@@ -27,6 +31,7 @@ body {
   overflow-x: hidden;
   background: linear-gradient(140deg, #f8fafc 0%, #ffffff 56%, #e2e8f0 100%);
   color: #0f172a;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 a {
@@ -167,6 +172,23 @@ img, svg, video, canvas, iframe {
   display: block;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+td,
+th {
+  max-width: 0;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Smooth page entrance */
 .page-transition {
   animation: pageRise 420ms ease-out;
@@ -207,7 +229,7 @@ img, svg, video, canvas, iframe {
 /* Smart TV optimization */
 @media (min-width: 3200px) {
   html {
-    font-size: 22px;
+    font-size: 24px;
   }
 }
 

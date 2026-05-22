@@ -3,11 +3,7 @@ import RatesSection from '../components/landing/RatesSection'
 import CalculatorSection from '../components/landing/CalculatorSection'
 import ServicesSection from '../components/landing/ServicesSection'
 import WhyChooseUsSection from '../components/landing/WhyChooseUsSection'
-import TestimonialsSection from '../components/landing/TestimonialsSection'
-import FaqSection from '../components/landing/FaqSection'
 import ContactSection from '../components/landing/ContactSection'
-import DashboardPreview from '../components/landing/DashboardPreview'
-import AnalyticsPreview from '../components/landing/AnalyticsPreview'
 
 export default function HomePage() {
   return (
@@ -15,12 +11,8 @@ export default function HomePage() {
       <HeroSection />
       <RatesSection />
       <CalculatorSection />
-      <ServicesSection />
       <WhyChooseUsSection />
-      <TestimonialsSection />
-      <FaqSection />
-      <DashboardPreview />
-      <AnalyticsPreview />
+      <ServicesSection />
       <ContactSection />
     </div>
   )

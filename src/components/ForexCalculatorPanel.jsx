@@ -126,7 +126,7 @@ export default function ForexCalculatorPanel({ full = false }) {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-xl border border-skybrand-200 bg-white py-3 pl-11 pr-3 text-sm outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
+          className="w-full min-w-0 rounded-xl border border-skybrand-200 bg-white py-3 pl-11 pr-3 text-sm outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
         >
           {/* TZS base option */}
           <option value="TZS">TZS — TANZANIAN SHILLINGS</option>
@@ -143,7 +143,7 @@ export default function ForexCalculatorPanel({ full = false }) {
   )
 
   return (
-    <section className="glass-surface rounded-3xl p-5 lg:p-7">
+    <section className="glass-surface overflow-hidden rounded-3xl p-4 sm:p-5 lg:p-7">
       {/* Branch context */}
       {selectedBranch && (
         <p className="mb-4 text-xs text-slate-500">
@@ -155,7 +155,7 @@ export default function ForexCalculatorPanel({ full = false }) {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Input panel */}
         <div className="grid gap-4">
-          <h2 className="font-display text-2xl text-slate-900">Currency Calculator</h2>
+          <h2 className="font-display text-[clamp(1.3rem,3.7vw,1.9rem)] text-slate-900">Currency Calculator</h2>
           <p className="text-sm text-slate-600">Real-time TZS rates. Buying = bureau pays you. Selling = bureau charges you.</p>
 
           {/* Mode toggle */}
@@ -186,20 +186,20 @@ export default function ForexCalculatorPanel({ full = false }) {
                 step="any"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-xl border border-skybrand-200 bg-white py-3 pl-9 pr-3 text-lg font-semibold outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
+                className="w-full min-w-0 rounded-xl border border-skybrand-200 bg-white py-3 pl-9 pr-3 text-[clamp(1rem,4.2vw,1.15rem)] font-semibold outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
                 placeholder="0.00"
               />
             </div>
           </label>
 
           {/* Currency pair */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+          <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-2">
             <CurrencySelect value={fromCode} onChange={setFromCode} label="From" />
             <motion.button
               onClick={swap}
               whileTap={{ rotate: 180 }}
               transition={{ duration: 0.25 }}
-              className="mb-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-skybrand-500 text-white shadow-glass hover:bg-skybrand-600 transition"
+              className="mx-auto mb-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-skybrand-500 text-white shadow-glass hover:bg-skybrand-600 transition sm:mx-0"
               aria-label="Swap currencies"
             >
               <FiRepeat size={16} />
@@ -225,7 +225,7 @@ export default function ForexCalculatorPanel({ full = false }) {
             className="rounded-2xl border border-skybrand-100 bg-gradient-to-br from-white to-skybrand-50 p-5"
           >
             <p className="text-xs uppercase tracking-[0.15em] text-slate-500">You Receive</p>
-            <p className="mt-2 font-display text-4xl font-bold text-slate-900">
+            <p className="mt-2 overflow-hidden text-ellipsis whitespace-nowrap font-display text-[clamp(1.5rem,8vw,2.35rem)] font-bold text-slate-900">
               {result > 0
                 ? result < 1
                   ? result.toFixed(6)
@@ -237,15 +237,15 @@ export default function ForexCalculatorPanel({ full = false }) {
             <div className="my-4 h-px bg-gradient-to-r from-skybrand-200 to-transparent" />
 
             <div className="grid gap-2 text-sm">
-              <div className="flex justify-between text-slate-600">
+              <div className="flex flex-wrap items-start justify-between gap-2 text-slate-600">
                 <span>Amount</span>
-                <span className="font-semibold">
+                <span className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   {formatTZS(Number(amount) || 0, 2)} {fromCode}
                 </span>
               </div>
-              <div className="flex justify-between text-slate-600">
+              <div className="flex flex-wrap items-start justify-between gap-2 text-slate-600">
                 <span>Effective Rate</span>
-                <span className="font-semibold">
+                <span className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   1 {fromCode === 'TZS' ? toCode : fromCode} ={' '}
                   {formatRate(effectiveRate)} TZS
                 </span>
@@ -263,7 +263,7 @@ export default function ForexCalculatorPanel({ full = false }) {
           {fromCode !== 'TZS' && fromRate && (
             <div className="rounded-xl border border-slate-100 bg-white/80 p-3 text-xs text-slate-600">
               <p className="font-semibold text-slate-700">{fromCode} Rates (TZS)</p>
-              <div className="mt-1 flex gap-4">
+              <div className="mt-1 flex flex-wrap gap-4">
                 <span>Buy: <strong>{formatRate(fromRate.buying_rate)}</strong></span>
                 <span>Sell: <strong>{formatRate(fromRate.selling_rate)}</strong></span>
               </div>
@@ -272,7 +272,7 @@ export default function ForexCalculatorPanel({ full = false }) {
           {toCode !== 'TZS' && toRate && toCode !== fromCode && (
             <div className="rounded-xl border border-slate-100 bg-white/80 p-3 text-xs text-slate-600">
               <p className="font-semibold text-slate-700">{toCode} Rates (TZS)</p>
-              <div className="mt-1 flex gap-4">
+              <div className="mt-1 flex flex-wrap gap-4">
                 <span>Buy: <strong>{formatRate(toRate.buying_rate)}</strong></span>
                 <span>Sell: <strong>{formatRate(toRate.selling_rate)}</strong></span>
               </div>
@@ -285,8 +285,8 @@ export default function ForexCalculatorPanel({ full = false }) {
       {full && history.length > 0 && (
         <div className="mt-6">
           <p className="mb-3 text-sm font-semibold text-slate-700">Conversion History</p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px] text-left text-xs">
+          <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <table className="w-full min-w-[620px] table-fixed text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-500">
                   <th className="pb-2 pr-4">Pair</th>
@@ -298,12 +298,12 @@ export default function ForexCalculatorPanel({ full = false }) {
               <tbody>
                 {history.map((h) => (
                   <tr key={h.id} className="border-b border-slate-50 text-slate-700">
-                    <td className="py-2 pr-4 font-semibold">{h.from}/{h.to}</td>
-                    <td className="py-2 pr-4">{formatTZS(h.amount, 2)}</td>
-                    <td className="py-2 pr-4 font-semibold text-skybrand-700">
+                    <td className="py-2 pr-4 font-semibold whitespace-nowrap">{h.from}/{h.to}</td>
+                    <td className="py-2 pr-4 whitespace-nowrap">{formatTZS(h.amount, 2)}</td>
+                    <td className="py-2 pr-4 font-semibold text-skybrand-700 whitespace-nowrap">
                       {formatTZS(h.result, 4)}
                     </td>
-                    <td className="py-2 text-slate-500">{h.at}</td>
+                    <td className="py-2 text-slate-500 whitespace-nowrap">{h.at}</td>
                   </tr>
                 ))}
               </tbody>

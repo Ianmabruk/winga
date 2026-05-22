@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from 'react'
+import { lazy, Suspense, useDeferredValue, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiRefreshCw, FiClock, FiWifi, FiWifiOff } from 'react-icons/fi'
 import { useRates } from '../hooks/useRates'
@@ -6,12 +6,24 @@ import { useForexStore } from '../store/useForexStore'
 import { formatTime } from '../utils/formatters'
 import BranchSelector from './BranchSelector'
 import SearchBar from './SearchBar'
-import RatesTable from './RatesTable'
 import { CurrencyCardSkeleton } from './LoadingSkeleton'
 
 const CurrencyCard = lazy(() => import('./CurrencyCard'))
 
-export default function ForexBoard({ mode = 'table' }) {
+const POPULAR = ['USD', 'EUR', 'GBP', 'AED', 'KES']
+const AFRICAN = ['KES', 'UGX', 'RWF', 'ZAR', 'BWP', 'NAD']
+const CRYPTO = ['BTC', 'ETH', 'USDT']
+
+function inGroup(code, group) {
+  if (group === 'all') return true
+  if (group === 'favorites') return false
+  if (group === 'popular') return POPULAR.includes(code)
+  if (group === 'african') return AFRICAN.includes(code)
+  if (group === 'crypto') return CRYPTO.includes(code)
+  return true
+}
+
+export default function ForexBoard() {
   const { isLoading, isFetching, isError, refetch } = useRates()
   const {
     ratesData,
@@ -19,17 +31,41 @@ export default function ForexBoard({ mode = 'table' }) {
     lastUpdated,
     searchQuery,
     selectedBranch,
+    favorites,
   } = useForexStore()
+  const [group, setGroup] = useState('all')
+  const deferredSearch = useDeferredValue(searchQuery)
 
   const visibleRates = useMemo(() => {
-    if (!searchQuery.trim()) return ratesData
-    const q = searchQuery.toLowerCase()
-    return ratesData.filter(
-      (r) =>
-        r.currency_code.toLowerCase().includes(q) ||
-        r.currency_actual_name?.toLowerCase().includes(q),
-    )
-  }, [ratesData, searchQuery])
+    const q = deferredSearch.trim().toLowerCase()
+
+    return ratesData.filter((r) => {
+      const code = r.currency_code
+      const byGroup =
+        group === 'favorites'
+          ? favorites.includes(code)
+          : inGroup(code, group)
+
+      if (!byGroup) return false
+      if (!q) return true
+
+      return (
+        code.toLowerCase().includes(q) ||
+        r.currency_actual_name?.toLowerCase().includes(q)
+      )
+    })
+  }, [ratesData, deferredSearch, group, favorites])
+
+  const groupedRates = useMemo(() => {
+    const groupDef = [
+      { id: 'popular', label: 'Popular Currencies', items: visibleRates.filter((r) => POPULAR.includes(r.currency_code)) },
+      { id: 'african', label: 'African Currencies', items: visibleRates.filter((r) => AFRICAN.includes(r.currency_code)) },
+      { id: 'other', label: 'International Markets', items: visibleRates.filter((r) => !POPULAR.includes(r.currency_code) && !AFRICAN.includes(r.currency_code) && !CRYPTO.includes(r.currency_code)) },
+      { id: 'crypto', label: 'Crypto', items: visibleRates.filter((r) => CRYPTO.includes(r.currency_code)) },
+    ]
+
+    return groupDef.filter((entry) => entry.items.length > 0)
+  }, [visibleRates])
 
   const hasData = ratesData.length > 0
 
@@ -38,7 +74,7 @@ export default function ForexBoard({ mode = 'table' }) {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <BranchSelector compact />
+          <BranchSelector />
           {selectedBranch && (
             <span className="hidden text-xs text-slate-500 sm:block">
               {selectedBranch.branch_name}
@@ -46,8 +82,8 @@ export default function ForexBoard({ mode = 'table' }) {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <SearchBar className="w-52" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <SearchBar className="w-full sm:w-56" />
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -59,6 +95,27 @@ export default function ForexBoard({ mode = 'table' }) {
             <FiRefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
           </button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          ['all', 'All'],
+          ['popular', 'Popular'],
+          ['african', 'African'],
+          ['favorites', 'Favorites'],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setGroup(id)}
+            className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+              group === id
+                ? 'bg-skybrand-600 text-white shadow-glass'
+                : 'border border-skybrand-200 bg-white text-slate-700 hover:bg-skybrand-50'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Status bar */}
@@ -102,29 +159,29 @@ export default function ForexBoard({ mode = 'table' }) {
         </div>
       )}
 
-      {/* Card grid mode */}
-      {mode === 'cards' && (
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => <CurrencyCardSkeleton key={i} />)
-            : visibleRates.map((rate) => (
-                <Suspense key={rate.currency_code} fallback={<CurrencyCardSkeleton />}>
-                  <CurrencyCard
-                    rate={rate}
-                    prev={previousRatesMap[rate.currency_code]}
-                  />
-                </Suspense>
-              ))}
-        </div>
-      )}
-
-      {/* Table mode (default) */}
-      {mode === 'table' && (
-        <RatesTable
-          data={visibleRates}
-          isLoading={isLoading && !hasData}
-        />
-      )}
+      <div className="grid gap-4">
+        {isLoading
+          ? (
+            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => <CurrencyCardSkeleton key={i} />)}
+            </div>
+          )
+          : groupedRates.map((bucket) => (
+            <div key={bucket.id} className="grid gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">{bucket.label}</h3>
+              <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                {bucket.items.map((rate) => (
+                  <Suspense key={rate.currency_code} fallback={<CurrencyCardSkeleton />}>
+                    <CurrencyCard
+                      rate={rate}
+                      prev={previousRatesMap[rate.currency_code]}
+                    />
+                  </Suspense>
+                ))}
+              </div>
+            </div>
+          ))}
+      </div>
 
       {/* No results from search */}
       {!isLoading && visibleRates.length === 0 && hasData && (

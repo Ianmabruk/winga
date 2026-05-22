@@ -1,6 +1,6 @@
-import { lazy, Suspense, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FiGrid, FiList, FiRefreshCw } from 'react-icons/fi'
+import { FiRefreshCw } from 'react-icons/fi'
 import { useBranches } from '../hooks/useBranches'
 import { useRates } from '../hooks/useRates'
 import { useForexStore } from '../store/useForexStore'
@@ -10,13 +10,10 @@ import ForexBoard from '../components/ForexBoard'
 import AnalyticsPanel from '../components/AnalyticsPanel'
 import FavoritesPanel from '../components/FavoritesPanel'
 
-const SparklineChart = lazy(() => import('../components/SparklineChart'))
-
 export default function LiveRatesPage() {
   useBranches()
   const { isFetching } = useRates()
-  const { selectedBranch, lastUpdated } = useForexStore()
-  const [mode, setMode] = useState('table') // 'table' | 'cards'
+  const { selectedBranch } = useForexStore()
   const [showBranchInfo, setShowBranchInfo] = useState(false)
 
   return (
@@ -27,11 +24,11 @@ export default function LiveRatesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-wrap items-start justify-between gap-4"
       >
-        <div>
+        <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.16em] text-skybrand-600 font-semibold">
             Live Exchange Rates
           </p>
-          <h1 className="font-display text-3xl font-bold text-slate-900 mt-1">
+          <h1 className="mt-1 font-display text-[clamp(1.55rem,4.5vw,2.15rem)] font-bold text-slate-900">
             Winga Forex Market Board
           </h1>
           <p className="mt-1 text-sm text-slate-600">
@@ -39,33 +36,9 @@ export default function LiveRatesPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* View mode toggle */}
-          <div className="flex rounded-xl border border-skybrand-200 bg-white p-1">
-            <button
-              onClick={() => setMode('table')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                mode === 'table'
-                  ? 'bg-skybrand-500 text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <FiList size={13} /> Table
-            </button>
-            <button
-              onClick={() => setMode('cards')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                mode === 'cards'
-                  ? 'bg-skybrand-500 text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <FiGrid size={13} /> Cards
-            </button>
-          </div>
-
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
           {isFetching && (
-            <div className="flex items-center gap-1 text-xs text-skybrand-600">
+            <div className="flex items-center gap-1 rounded-xl border border-skybrand-200 bg-white px-3 py-2 text-xs text-skybrand-600">
               <FiRefreshCw size={12} className="animate-spin" />
               Refreshing…
             </div>
@@ -96,7 +69,7 @@ export default function LiveRatesPage() {
 
       {/* Main board + sidebar */}
       <div className="grid gap-5 xl:grid-cols-[1fr_280px]">
-        <ForexBoard mode={mode} />
+        <ForexBoard />
         <FavoritesPanel />
       </div>
     </section>

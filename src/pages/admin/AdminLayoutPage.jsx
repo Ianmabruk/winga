@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { HiChevronDoubleLeft, HiChevronDoubleRight, HiMenuAlt2, HiOutlineX } from 'react-icons/hi'
+import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi'
 import { FiActivity, FiFileText, FiMapPin, FiShield, FiUsers } from 'react-icons/fi'
 
 const items = [
@@ -15,7 +15,6 @@ const items = [
 export default function AdminLayoutPage() {
   const location = useLocation()
   const [isDark, setIsDark] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
 
   useEffect(() => {
@@ -70,7 +69,7 @@ export default function AdminLayoutPage() {
         {items.map((item) => {
           const Icon = item.icon
           return (
-            <NavLink key={item.to} to={item.to} className={navLinkClass} onClick={() => setIsSidebarOpen(false)} title={collapsed ? item.label : ''}>
+            <NavLink key={item.to} to={item.to} className={navLinkClass} title={collapsed ? item.label : ''}>
               <Icon className="text-base" />
               {!collapsed && <span>{item.label}</span>}
             </NavLink>
@@ -82,20 +81,35 @@ export default function AdminLayoutPage() {
 
   return (
     <div className={`relative min-h-[70vh] ${isDark ? 'text-slate-100' : ''}`}>
-      <div className="mb-4 flex items-center justify-between xl:hidden">
+      <div className="mb-4 grid gap-3 xl:hidden">
         <div>
           <p className={`text-xs uppercase tracking-[0.16em] ${isDark ? 'text-slate-400' : 'text-skybrand-700'}`}>
             Admin Dashboard
           </p>
           <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Control Center</h2>
         </div>
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${isDark ? 'border border-slate-700 bg-slate-900 text-slate-100' : 'glass-surface text-skybrand-700'}`}
-          aria-label="Open admin sidebar"
-        >
-          <HiMenuAlt2 className="text-xl" />
-        </button>
+        <nav className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {items.map((item) => {
+            const Icon = item.icon
+            const active = location.pathname.startsWith(item.to)
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                  active
+                    ? 'bg-skybrand-600 text-white shadow-glass'
+                    : isDark
+                      ? 'border border-slate-700 bg-slate-900 text-slate-200'
+                      : 'border border-skybrand-200 bg-white text-slate-700'
+                }`}
+              >
+                <Icon size={13} />
+                {item.label}
+              </NavLink>
+            )
+          })}
+        </nav>
       </div>
 
       <div className={`grid gap-6 ${isDesktopCollapsed ? 'xl:grid-cols-[92px_1fr]' : 'xl:grid-cols-[280px_1fr]'}`}>
@@ -122,28 +136,6 @@ export default function AdminLayoutPage() {
           <Outlet />
         </section>
       </div>
-
-      {isSidebarOpen && (
-        <div className="fixed inset-0 z-50 xl:hidden">
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="absolute inset-0 bg-slate-950/50"
-            aria-label="Close admin sidebar overlay"
-          />
-          <aside className={`relative h-full w-[86%] max-w-[320px] p-4 ${isDark ? 'border-r border-slate-700 bg-slate-950 text-slate-100' : 'border-r border-slate-200 bg-white text-slate-900'}`}>
-            <div className="mb-2 flex items-center justify-end">
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${isDark ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'}`}
-                aria-label="Close admin sidebar"
-              >
-                <HiOutlineX className="text-lg" />
-              </button>
-            </div>
-            <SidebarNav />
-          </aside>
-        </div>
-      )}
     </div>
   )
 }

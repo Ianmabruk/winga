@@ -2,10 +2,10 @@ import { motion } from 'framer-motion'
 import { FiShield, FiZap, FiStar, FiUsers, FiCheck } from 'react-icons/fi'
 
 const stats = [
-  { value: '25+', label: 'Currencies', color: 'text-skybrand-600' },
-  { value: '15s', label: 'Rate Refresh', color: 'text-accent-500' },
-  { value: '100%', label: 'BOT Licensed', color: 'text-market-up' },
-  { value: '24/7', label: 'Rate Monitoring', color: 'text-purple-600' },
+  { value: '25+', label: 'Currencies', color: 'text-skybrand-700' },
+  { value: '15s', label: 'Rate Refresh', color: 'text-skybrand-600' },
+  { value: '100%', label: 'BOT Licensed', color: 'text-skybrand-700' },
+  { value: '24/7', label: 'Rate Monitoring', color: 'text-skybrand-600' },
 ]
 
 const reasons = [

@@ -43,8 +43,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Inter', 'Poppins', 'ui-sans-serif', 'sans-serif'],
-        body: ['Inter', 'ui-sans-serif', 'sans-serif'],
+        display: ['Manrope', 'Poppins', 'Inter', 'ui-sans-serif', 'sans-serif'],
+        body: ['Inter', 'Manrope', 'ui-sans-serif', 'sans-serif'],
       },
       backdropBlur: {
         xs: '2px',
