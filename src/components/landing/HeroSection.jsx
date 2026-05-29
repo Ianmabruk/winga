@@ -86,7 +86,6 @@ export default function HeroSection() {
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
               Fast, Secure, Reliable and Competitive Forex Exchange Services in Tanzania.
-              Located at the heart of Arusha – Near NBC Bank.
             </motion.p>
 
             {/* CTAs */}

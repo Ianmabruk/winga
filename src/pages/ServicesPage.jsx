@@ -19,11 +19,6 @@ const services = [
     icon: FiTrendingUp,
   },
   {
-    title: 'International Transfers',
-    detail: 'Cross-border support for supplier payments, tuition, travel, and urgent international obligations.',
-    icon: FiGlobe,
-  },
-  {
     title: 'Business Forex',
     detail: 'Treasury guidance for import-export businesses exposed to volatile corridors and recurring FX needs.',
     icon: FiBriefcase,
@@ -49,19 +44,9 @@ const processSteps = ['Request Quote', 'Rate Confirmation', 'Compliance Check', 
 
 const supportPillars = [
   {
-    title: 'Fast exchange process',
-    detail: 'Clear steps, fewer handoffs, and faster execution from quote to settlement.',
-    icon: FiZap,
-  },
-  {
     title: 'Secure transactions',
     detail: 'Operational controls, licensed bureau procedures, and disciplined handling of funds.',
     icon: FiShield,
-  },
-  {
-    title: 'Financial support',
-    detail: 'Responsive forex help for retail clients, travellers, and business operators.',
-    icon: FiCompass,
   },
 ]
 
@@ -94,7 +79,7 @@ export default function ServicesPage() {
               A dedicated services surface for exchange, transfers, corporate support, travel forex, and secure transaction guidance without clutter.
             </p>
             <div className="mt-5 flex flex-wrap gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-slate-600">
-              {['Retail exchange', 'International transfers', 'Corporate support'].map((pill) => (
+              {['Retail exchange', 'Corporate support'].map((pill) => (
                 <span key={pill} className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 backdrop-blur">
                   {pill}
                 </span>
