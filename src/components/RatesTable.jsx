@@ -142,6 +142,7 @@ export default function RatesTable({ data = [], isLoading }) {
                         alt={rate.currency_code}
                         className="h-4 w-6 rounded-sm object-cover"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
                       />
                       <div className="min-w-0">
                         <span className="block truncate font-bold text-slate-900">{rate.currency_code}</span>

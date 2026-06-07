@@ -173,6 +173,8 @@ export default function LiveRatesPage() {
                       src={getFlagUrl(rate.currency_code)}
                       alt={`${rate.currency_code} flag`}
                       className="h-5 w-8 rounded object-cover shadow-sm"
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
                     />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-950">{rate.currency_code}</p>

@@ -99,7 +99,13 @@ export default function CalculatorSection({ compact = false }) {
             <div className="mb-3">
               <label className="text-xs font-semibold text-skybrand-300 uppercase tracking-wider mb-1.5 block">From</label>
               <div className="relative">
-                <img src={getFlagUrl(from)} alt={from} className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-7 rounded object-cover" />
+                <img
+                  src={getFlagUrl(from)}
+                  alt={from}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-7 rounded object-cover"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
+                />
                 <select value={from} onChange={(e) => setFrom(e.target.value)}
                   className="w-full rounded-xl bg-white/15 border border-white/20 pl-12 pr-4 py-3 text-white font-semibold outline-none focus:border-accent-400 transition appearance-none">
                   {codes.map((c) => <option key={c} value={c} className="text-slate-900">{c}</option>)}
@@ -119,7 +125,13 @@ export default function CalculatorSection({ compact = false }) {
             <div className="mb-6">
               <label className="text-xs font-semibold text-skybrand-300 uppercase tracking-wider mb-1.5 block">To</label>
               <div className="relative">
-                <img src={getFlagUrl(to)} alt={to} className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-7 rounded object-cover" />
+                <img
+                  src={getFlagUrl(to)}
+                  alt={to}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-7 rounded object-cover"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
+                />
                 <select value={to} onChange={(e) => setTo(e.target.value)}
                   className="w-full rounded-xl bg-white/15 border border-white/20 pl-12 pr-4 py-3 text-white font-semibold outline-none focus:border-accent-400 transition appearance-none">
                   {codes.map((c) => <option key={c} value={c} className="text-slate-900">{c}</option>)}

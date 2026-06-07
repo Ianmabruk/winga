@@ -22,7 +22,13 @@ function HeroRateCard({ code, index }) {
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <img src={getFlagUrl(code)} alt={code} className="h-5 w-7 rounded object-cover" />
+          <img
+            src={getFlagUrl(code)}
+            alt={code}
+            className="h-5 w-7 rounded object-cover"
+            loading="lazy"
+            onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
+          />
           <span className="text-sm font-bold text-skybrand-900">{code}</span>
         </div>
         {up
@@ -125,11 +131,7 @@ export default function HeroSection() {
                 className="w-full rounded-[32px] object-cover object-center transition duration-700 ease-out sm:h-[280px]"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/25 to-transparent" />
-              <div className="absolute inset-x-4 bottom-4 rounded-3xl border border-white/25 bg-white/10 p-4 backdrop-blur-xl shadow-xl">
-                <p className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-200">Premium bureau transport imagery</p>
-                <p className="mt-2 text-sm font-semibold text-white">A polished travel-inspired visual, built for trusted forex and client service.</p>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-slate-900/10 to-transparent" />
             </motion.div>
 
             <div className="grid grid-cols-2 gap-4">

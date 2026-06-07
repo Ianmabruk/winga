@@ -42,6 +42,7 @@ export default function LiveTicker() {
                 alt={item.currency_code}
                 className="h-3.5 w-5 rounded-sm object-cover"
                 loading="lazy"
+                onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
               />
               <span>{item.currency_code}/TZS</span>
               <span className="font-bold text-slate-800">{formatRate(item.selling_rate)}</span>

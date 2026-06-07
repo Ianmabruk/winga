@@ -185,6 +185,8 @@ export default function MarketPage() {
                         src={getFlagUrl(item.currency_code)}
                         alt={`${item.currency_code} flag`}
                         className="h-5 w-8 rounded object-cover shadow-sm"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
                       />
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{item.currency_code}</p>
@@ -281,6 +283,8 @@ export default function MarketPage() {
                         src={getFlagUrl(item.currency_code)}
                         alt={`${item.currency_code} flag`}
                         className="h-4 w-6 rounded object-cover"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
                       />
                       <p className="text-base font-semibold text-slate-950">{item.currency_code}</p>
                     </div>
@@ -336,6 +340,8 @@ export default function MarketPage() {
                         src={getFlagUrl(item.currency_code)}
                         alt={`${item.currency_code} flag`}
                         className="h-5 w-8 rounded object-cover shadow-sm"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-slate-950">{item.currency_code}</p>

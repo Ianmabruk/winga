@@ -116,8 +116,8 @@ export default function AnalyticsPanel() {
             <img
               src={getFlagUrl(stats.widestSpread.currency_code)}
               alt={stats.widestSpread.currency_code}
-              className="h-4 w-6 rounded-sm object-cover"
-            />
+              className="h-4 w-6 rounded-sm object-cover"              loading="lazy"
+              onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}            />
             <div>
               <p className="text-sm font-bold text-slate-900">{stats.widestSpread.currency_code}</p>
               <p className="text-xs text-slate-500">
@@ -139,8 +139,8 @@ export default function AnalyticsPanel() {
             <img
               src={getFlagUrl(stats.tightestSpread.currency_code)}
               alt={stats.tightestSpread.currency_code}
-              className="h-4 w-6 rounded-sm object-cover"
-            />
+              className="h-4 w-6 rounded-sm object-cover"              loading="lazy"
+              onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}            />
             <div>
               <p className="text-sm font-bold text-slate-900">{stats.tightestSpread.currency_code}</p>
               <p className="text-xs text-slate-500">

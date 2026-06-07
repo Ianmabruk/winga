@@ -28,6 +28,8 @@ function CurrencySelect({ value, onChange, label, currencyOptions }) {
           src={getFlagUrl(value)}
           alt={value}
           className="absolute left-3 h-4 w-6 rounded-sm object-cover"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
         />
         <select
           value={value}

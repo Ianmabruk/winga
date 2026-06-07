@@ -48,6 +48,7 @@ export default function CurrencyCard({ rate, prev }) {
             alt={`${rate.currency_code} flag`}
             className="h-4 w-6 rounded-sm object-cover shadow-sm"
             loading="lazy"
+            onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
           />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-slate-900">{rate.currency_code}</p>

@@ -60,7 +60,13 @@ export default function RatesSection() {
                 {/* Flag + code */}
                 <div className="relative flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <img src={getFlagUrl(code)} alt={code} className="h-6 w-8 rounded object-cover shadow-sm" />
+                    <img
+                      src={getFlagUrl(code)}
+                      alt={code}
+                      className="h-6 w-8 rounded object-cover shadow-sm"
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
+                    />
                     <div>
                       <p className="text-sm font-bold text-slate-900">{code}</p>
                       <p className="text-[10px] text-slate-400">{r.currency_name || code}</p>

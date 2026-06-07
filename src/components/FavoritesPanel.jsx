@@ -41,6 +41,7 @@ export default function FavoritesPanel() {
                 alt={rate.currency_code}
                 className="h-4 w-6 rounded-sm object-cover"
                 loading="lazy"
+                onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-900">{rate.currency_code}</p>

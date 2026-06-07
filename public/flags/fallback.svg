@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 64 48" role="img" aria-label="Fallback flag icon">
+  <rect width="64" height="48" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <circle cx="32" cy="24" r="12" fill="#93c5fd" />
+  <path d="M20 18 L44 18 L32 32 Z" fill="#3b82f6" />
+</svg>
