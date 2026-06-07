@@ -24,28 +24,28 @@ export default function Navbar() {
 	}, [])
 
 	return (
-		<header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-xl shadow-glass-lg border-b border-skybrand-100' : 'bg-white/80 backdrop-blur-xl'}`}>
-			<div className="mx-auto flex w-[min(1440px,96vw)] items-center justify-between px-4 py-3 md:py-4">
-				<WingaForexLogo />
+		<header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'border-b border-white/70 bg-white/82 shadow-[0_16px_40px_rgba(15,23,42,0.08)] backdrop-blur-2xl' : 'bg-white/68 backdrop-blur-xl'}`}>
+			<div className="mx-auto flex w-[min(1440px,96vw)] items-center justify-between px-4 py-3 md:py-3.5">
+				<WingaForexLogo variant="header" />
 
-				<nav className="hidden lg:flex items-center gap-1">
+				<nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/70 bg-white/58 px-2 py-1 shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur-xl">
 					{links.map(({ to, label, end }) => (
 						<NavLink
 							key={to}
 							to={to}
 							end={end}
 							className={({ isActive }) =>
-								`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
+								`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
 									isActive
 										? 'bg-skybrand-600 text-white shadow-sm'
-										: 'text-slate-700 hover:text-skybrand-700 hover:bg-skybrand-50'
+										: 'text-slate-700 hover:text-skybrand-700 hover:bg-skybrand-50/80'
 								}`
 							}
 						>
 							{label}
 						</NavLink>
 					))}
-					<Link to="/rates" className="ml-1 rounded-xl bg-skybrand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-skybrand-700 transition-all duration-200">
+					<Link to="/rates" className="ml-1 rounded-full bg-skybrand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-skybrand-700 transition-all duration-200">
 						View Rates
 					</Link>
 				</nav>

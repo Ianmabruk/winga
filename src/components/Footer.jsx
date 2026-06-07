@@ -32,7 +32,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-4">
-              <WingaForexLogo />
+              <WingaForexLogo variant="footer" />
             </div>
             <p className="text-sm leading-relaxed text-slate-400 mt-4">
               Tanzania's most trusted foreign exchange bureau. Real-time rates,
@@ -84,15 +84,15 @@ export default function Footer() {
             <ul className="grid gap-3">
               <li className="flex items-start gap-2.5">
                 <FiMapPin size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
-                <span className="text-sm text-slate-400">Sokoine Road, Arusha, Tanzania – Near NBC Bank</span>
+                <span className="text-sm text-slate-400">P.O. Box 10581, Arusha</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <FiPhone size={14} className="shrink-0 text-skybrand-400" />
-                <a href="tel:+255000000000" className="text-sm text-slate-400 hover:text-white transition">+255 000 000 000</a>
+                <a href="tel:+255768024017" className="text-sm text-slate-400 hover:text-white transition">+255 768 024 017</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FiMail size={14} className="shrink-0 text-skybrand-400" />
-                <a href="mailto:info@wingaforex.co.tz" className="text-sm text-slate-400 hover:text-white transition">info@wingaforex.co.tz</a>
+                <a href="mailto:wingaforex@gmail.com" className="text-sm text-slate-400 hover:text-white transition">wingaforex@gmail.com</a>
               </li>
               <li className="flex items-start gap-2.5">
                 <FiClock size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
@@ -106,7 +106,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="mx-auto w-[min(1440px,96vw)] px-4 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
         <p>© {new Date().getFullYear()} Winga Forex Bureau. All rights reserved.</p>
-        <p>Licensed by the Bank of Tanzania · Sokoine Road, Arusha</p>
+        <p>Licensed by the Bank of Tanzania · P.O. Box 10581, Arusha</p>
       </div>
     </footer>
   )

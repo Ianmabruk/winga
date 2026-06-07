@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FiUsers, FiBarChart2, FiShield, FiRefreshCw, FiAlertCircle, FiTrendingUp } from 'react-icons/fi'
+import { FiUsers, FiRefreshCw, FiAlertCircle, FiTrendingUp } from 'react-icons/fi'
 
 const widgets = [
   {

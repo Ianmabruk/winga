@@ -3,13 +3,10 @@ import { Link } from 'react-router-dom'
 import {
   FiArrowRight,
   FiBriefcase,
-  FiCompass,
   FiCreditCard,
-  FiGlobe,
   FiHeadphones,
   FiShield,
   FiTrendingUp,
-  FiZap,
 } from 'react-icons/fi'
 
 const services = [

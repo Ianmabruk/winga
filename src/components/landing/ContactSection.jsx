@@ -27,8 +27,8 @@ export default function ContactSection({ compact = false }) {
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">Need branch details, live assistance, or transaction guidance? Use the quickest channel for what you need.</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <a href="tel:+255000000000" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Call Support</a>
-                <a href="mailto:info@wingaforex.co.tz" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Email Us</a>
+                <a href="tel:+255768024017" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Call Support</a>
+                <a href="mailto:wingaforex@gmail.com" className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-skybrand-200 hover:bg-white">Email Us</a>
                 <Link to="/contact" className="rounded-2xl bg-skybrand-600 px-4 py-4 text-center text-sm font-semibold text-white transition hover:bg-skybrand-700">Open Contact Page</Link>
                 <Link to="/rates" className="rounded-2xl border border-skybrand-200 bg-white px-4 py-4 text-center text-sm font-semibold text-skybrand-700 transition hover:bg-skybrand-50">View Live Rates</Link>
               </div>
@@ -56,9 +56,9 @@ export default function ContactSection({ compact = false }) {
           <div>
             <div className="grid sm:grid-cols-2 gap-4 mb-6">
               {[
-                { icon: FiMapPin, label: 'Office Address', val: 'Sokoine Road, Arusha, Tanzania – Near NBC Bank' },
-                { icon: FiPhone, label: 'Phone', val: '+255 000 000 000', href: 'tel:+255000000000' },
-                { icon: FiMail, label: 'Email', val: 'info@wingaforex.co.tz', href: 'mailto:info@wingaforex.co.tz' },
+                { icon: FiMapPin, label: 'Office Address', val: 'P.O. Box 10581, Arusha' },
+                { icon: FiPhone, label: 'Phone', val: '+255 768 024 017', href: 'tel:+255768024017' },
+                { icon: FiMail, label: 'Email', val: 'wingaforex@gmail.com', href: 'mailto:wingaforex@gmail.com' },
                 { icon: FiClock, label: 'Working Hours', val: 'Mon–Fri: 8am–6pm\nSat: 9am–3pm' },
               ].map(({ icon: Icon, label, val, href }) => (
                 <motion.div key={label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -114,7 +114,7 @@ export default function ContactSection({ compact = false }) {
                   <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 block">Phone</label>
                   <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none focus:border-skybrand-400 focus:bg-white transition"
-                    placeholder="+255 000 000 000" />
+                    placeholder="+255 768 024 017" />
                 </div>
               </div>
               <div>

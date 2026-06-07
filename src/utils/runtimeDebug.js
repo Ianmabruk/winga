@@ -1,3 +1,5 @@
+/* global __APP_BUILD_ID__, __APP_BUILD_TIME__ */
+
 function asBool(value) {
   return String(value).toLowerCase() === 'true'
 }

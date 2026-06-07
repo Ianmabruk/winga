@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi'
 import { FiActivity, FiFileText, FiMapPin, FiShield, FiUsers } from 'react-icons/fi'
@@ -12,37 +12,8 @@ const items = [
   { to: '/admin/audit', label: 'Audit Logs', icon: FiFileText },
 ]
 
-export default function AdminLayoutPage() {
-  const location = useLocation()
-  const [isDark, setIsDark] = useState(false)
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('winga_admin_dark') === 'true'
-    const savedCollapsed = localStorage.getItem('winga_admin_collapsed') === 'true'
-    setIsDark(saved)
-    setIsDesktopCollapsed(savedCollapsed)
-  }, [])
-
-  const toggleTheme = () => {
-    const next = !isDark
-    setIsDark(next)
-    localStorage.setItem('winga_admin_dark', `${next}`)
-  }
-
-  const toggleDesktopSidebar = () => {
-    const next = !isDesktopCollapsed
-    setIsDesktopCollapsed(next)
-    localStorage.setItem('winga_admin_collapsed', `${next}`)
-  }
-
-  const currentSection =
-    items.find((item) => location.pathname.startsWith(item.to))?.label || 'Overview'
-
-  const navLinkClass = ({ isActive }) =>
-    `flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition ${isDesktopCollapsed ? 'justify-center' : 'gap-3'} ${isActive ? 'bg-skybrand-500 text-white shadow-md shadow-skybrand-500/30' : isDark ? 'text-slate-100 hover:bg-slate-800' : 'text-slate-700 hover:bg-skybrand-100/80'}`
-
-  const SidebarNav = ({ collapsed = false }) => (
+function SidebarNav({ collapsed = false, isDark, toggleTheme, navLinkClass }) {
+  return (
     <>
       {!collapsed && (
         <div className={`rounded-2xl p-4 ${isDark ? 'border border-slate-700 bg-slate-900/80' : 'bg-gradient-to-br from-skybrand-50 to-white'}`}>
@@ -78,6 +49,30 @@ export default function AdminLayoutPage() {
       </nav>
     </>
   )
+}
+
+export default function AdminLayoutPage() {
+  const location = useLocation()
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' && localStorage.getItem('winga_admin_dark') === 'true')
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => typeof window !== 'undefined' && localStorage.getItem('winga_admin_collapsed') === 'true')
+
+  const toggleTheme = () => {
+    const next = !isDark
+    setIsDark(next)
+    localStorage.setItem('winga_admin_dark', `${next}`)
+  }
+
+  const toggleDesktopSidebar = () => {
+    const next = !isDesktopCollapsed
+    setIsDesktopCollapsed(next)
+    localStorage.setItem('winga_admin_collapsed', `${next}`)
+  }
+
+  const currentSection =
+    items.find((item) => location.pathname.startsWith(item.to))?.label || 'Overview'
+
+  const navLinkClass = ({ isActive }) =>
+    `flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition ${isDesktopCollapsed ? 'justify-center' : 'gap-3'} ${isActive ? 'bg-skybrand-500 text-white shadow-md shadow-skybrand-500/30' : isDark ? 'text-slate-100 hover:bg-slate-800' : 'text-slate-700 hover:bg-skybrand-100/80'}`
 
   return (
     <div className={`relative min-h-[70vh] ${isDark ? 'text-slate-100' : ''}`}>
@@ -123,7 +118,7 @@ export default function AdminLayoutPage() {
               {isDesktopCollapsed ? <HiChevronDoubleRight /> : <HiChevronDoubleLeft />}
             </button>
           </div>
-          <SidebarNav collapsed={isDesktopCollapsed} />
+          <SidebarNav collapsed={isDesktopCollapsed} isDark={isDark} toggleTheme={toggleTheme} navLinkClass={navLinkClass} />
         </aside>
 
         <section className={`grid gap-4 rounded-3xl p-3 backdrop-blur-sm md:p-4 ${isDark ? 'border border-slate-700 bg-slate-900/75' : 'border border-white/60 bg-white/45'}`}>

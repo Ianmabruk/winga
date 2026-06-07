@@ -91,7 +91,11 @@ export default function MobileBottomNav() {
         className="fixed inset-x-0 bottom-2 z-[60] lg:hidden"
         aria-label="Primary mobile navigation"
       >
-        <div className="pointer-events-auto mx-auto grid w-[min(640px,94vw)] grid-cols-[1fr_auto_1fr] items-end gap-2">
+        <div className="pointer-events-auto mx-auto w-[min(640px,94vw)]">
+          <div className="mb-2 flex items-center justify-center rounded-full bg-white/90 px-3 py-2 shadow-[0_12px_32px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+            <img src="/assets/winga-logo.png" alt="Winga Forex Bureau Official Logo" className="h-7 w-auto object-contain" loading="lazy" />
+          </div>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
           <div className="rounded-[24px] border border-skybrand-100/90 bg-white/72 p-1 shadow-[0_10px_30px_rgba(3,105,161,0.18)] backdrop-blur-xl">
             <div className="grid grid-cols-2 gap-1">
               {leftItems.map((item) => (
@@ -122,6 +126,7 @@ export default function MobileBottomNav() {
             </div>
           </div>
         </div>
+      </div>
       </motion.nav>
     </AnimatePresence>
   )

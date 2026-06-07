@@ -75,28 +75,24 @@ export default function HeroSection() {
             {/* Headline */}
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
               className="mb-5 text-[clamp(2rem,6vw,4.25rem)] font-extrabold leading-[1.05] text-skybrand-950">
-              Your Trusted Partner In{' '}
-              <span className="relative">
-                <span className="text-skybrand-600">Global Currency</span>
-                <span className="absolute -bottom-1 left-0 w-full h-1 bg-accent-500 rounded-full" />
-              </span>{' '}Exchange
+              Your Trusted Forex Exchange Partner
             </motion.h1>
 
             {/* Sub */}
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
-              Fast, Secure, Reliable and Competitive Forex Exchange Services in Tanzania.
+              className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
+              Competitive exchange rates, secure transactions, and exceptional customer service.
             </motion.p>
 
             {/* CTAs */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="flex flex-wrap gap-3 mb-10">
               <Link to="/rates"
-                className="flex items-center gap-2 rounded-2xl bg-skybrand-600 px-7 py-3.5 text-sm font-bold text-white shadow-glass transition-colors duration-200 hover:bg-skybrand-700">
+                className="flex items-center gap-2 rounded-2xl bg-skybrand-600 px-7 py-3.5 text-sm font-bold text-white shadow-glow-sky transition-all duration-200 hover:bg-skybrand-700">
                 View Live Rates <FiArrowRight size={16} />
               </Link>
               <Link to="/contact"
-                className="flex items-center gap-2 rounded-2xl border-2 border-skybrand-200 bg-white px-7 py-3.5 text-sm font-bold text-skybrand-700 hover:border-skybrand-400 hover:bg-skybrand-50 transition-all duration-200">
+                className="flex items-center gap-2 rounded-2xl border border-skybrand-300 bg-white px-7 py-3.5 text-sm font-bold text-skybrand-700 hover:border-skybrand-400 hover:bg-skybrand-50 transition-all duration-200">
                 Contact Us
               </Link>
             </motion.div>
@@ -118,18 +114,21 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="group relative overflow-hidden rounded-3xl border border-skybrand-100 bg-slate-900"
+              className="group relative overflow-hidden rounded-[32px] border border-slate-200 bg-slate-950 shadow-[0_20px_60px_rgba(15,23,42,0.15)]"
             >
-              <img
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80"
-                alt="Modern blue financial district skyline"
-                className="h-[220px] w-full object-cover object-center transition duration-500 group-hover:scale-[1.02] sm:h-[260px]"
+              <motion.img
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                src="/assets/winga-hero-image.jpg"
+                alt="Safari vehicle in premium forex travel imagery"
+                className="w-full rounded-[32px] object-cover object-center transition duration-700 ease-out sm:h-[280px]"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-skybrand-950/90 via-skybrand-900/45 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/25 bg-white/12 p-3 backdrop-blur-lg">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-skybrand-100">Arusha Forex Desk</p>
-                <p className="mt-1 text-sm font-semibold text-white">Live trading displays and premium bureau service environment</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/25 to-transparent" />
+              <div className="absolute inset-x-4 bottom-4 rounded-3xl border border-white/25 bg-white/10 p-4 backdrop-blur-xl shadow-xl">
+                <p className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-200">Premium bureau transport imagery</p>
+                <p className="mt-2 text-sm font-semibold text-white">A polished travel-inspired visual, built for trusted forex and client service.</p>
               </div>
             </motion.div>
 

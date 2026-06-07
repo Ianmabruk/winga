@@ -39,7 +39,7 @@ export default function RatesSection() {
         </div>
 
         {/* Cards grid */}
-        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((r, i) => {
             const code = r.currency_code
             const changed = changedCurrencies.includes(code)
@@ -51,7 +51,7 @@ export default function RatesSection() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06 }}
                 whileHover={{ y: -4, boxShadow: '0 16px 48px rgba(2,132,199,0.18)' }}
-                className={`group relative bg-white border rounded-2xl p-4 shadow-card transition-all duration-300 cursor-default overflow-hidden
+                className={`group relative flex min-h-[220px] flex-col justify-between bg-white border rounded-2xl p-4 shadow-card transition-all duration-300 overflow-hidden
                   ${changed ? 'border-accent-400 ring-2 ring-accent-400/30' : 'border-slate-200 hover:border-skybrand-300'}`}
               >
                 {/* Glow bg */}
@@ -72,14 +72,14 @@ export default function RatesSection() {
                 </div>
 
                 {/* Rates */}
-                <div className="relative grid grid-cols-2 gap-2">
-                  <div className="bg-market-up/8 rounded-xl p-2 text-center border border-market-up/10">
+                <div className="relative grid grid-cols-2 gap-2 grow">
+                  <div className="rounded-xl border border-market-up/10 bg-market-up/8 p-3 text-center">
                     <p className="text-[10px] text-slate-500 font-medium">BUY</p>
-                    <p className="text-sm font-bold text-market-up">{formatRate(r.buying_rate)}</p>
+                    <p className="mt-2 text-sm font-bold text-market-up">{formatRate(r.buying_rate)}</p>
                   </div>
-                  <div className="bg-skybrand-50 rounded-xl p-2 text-center border border-skybrand-100">
+                  <div className="rounded-xl border border-skybrand-100 bg-skybrand-50 p-3 text-center">
                     <p className="text-[10px] text-slate-500 font-medium">SELL</p>
-                    <p className="text-sm font-bold text-skybrand-700">{formatRate(r.selling_rate)}</p>
+                    <p className="mt-2 text-sm font-bold text-skybrand-700">{formatRate(r.selling_rate)}</p>
                   </div>
                 </div>
 

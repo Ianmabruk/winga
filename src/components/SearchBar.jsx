@@ -8,10 +8,6 @@ export default function SearchBar({ placeholder = 'Search currency…', classNam
   const [localQuery, setLocalQuery] = useState(searchQuery)
 
   useEffect(() => {
-    setLocalQuery(searchQuery)
-  }, [searchQuery])
-
-  useEffect(() => {
     const timer = setTimeout(() => setSearchQuery(localQuery), 180)
     return () => clearTimeout(timer)
   }, [localQuery, setSearchQuery])

@@ -4,8 +4,9 @@ export default function TradingViewEmbed({ symbol = 'FX_IDC:USDKES' }) {
   const container = useRef(null)
 
   useEffect(() => {
-    if (!container.current) return undefined
-    container.current.innerHTML = ''
+    const mount = container.current
+    if (!mount) return undefined
+    mount.innerHTML = ''
 
     const widget = document.createElement('div')
     widget.className = 'tradingview-widget-container__widget'
@@ -29,11 +30,11 @@ export default function TradingViewEmbed({ symbol = 'FX_IDC:USDKES' }) {
       support_host: 'https://www.tradingview.com',
     })
 
-    container.current.appendChild(widget)
-    container.current.appendChild(script)
+    mount.appendChild(widget)
+    mount.appendChild(script)
 
     return () => {
-      if (container.current) container.current.innerHTML = ''
+      if (mount) mount.innerHTML = ''
     }
   }, [symbol])
 

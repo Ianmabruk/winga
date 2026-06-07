@@ -85,7 +85,7 @@ export default function RatesTable({ data = [], isLoading }) {
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-cyanice bg-white shadow-sm">
-      <table className="w-full min-w-[860px] table-fixed text-left text-sm" role="table">
+      <table className="w-full min-w-full table-auto text-left text-sm" role="table">
         <thead>
           <tr className="border-b border-slate-100 bg-slate-50/80">
             {cols.map((col) => (
@@ -154,8 +154,8 @@ export default function RatesTable({ data = [], isLoading }) {
 
                   {/* Full name */}
                   <td className="hidden px-3 py-3 text-slate-600 lg:table-cell">
-                    <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
-                    {rate.currency_actual_name}
+                    <span className="block max-w-[260px] break-words text-sm leading-5">
+                      {rate.currency_actual_name}
                     </span>
                   </td>
 

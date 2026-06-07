@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
+const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const MarketPage = lazy(() => import('./pages/MarketPage'))
@@ -22,9 +23,12 @@ const BranchesPage = lazy(() => import('./pages/admin/BranchesPage'))
 const RatesPage = lazy(() => import('./pages/admin/RatesPage'))
 const AuditLogsPage = lazy(() => import('./pages/admin/AuditLogsPage'))
 
+import WingaForexLogo from './components/WingaForexLogo'
+
 const RouteLoader = () => (
   <div className="glass-surface grid place-items-center rounded-3xl p-10 text-center">
-    <p className="text-xs uppercase tracking-[0.16em] text-skybrand-700">Loading view</p>
+    <WingaForexLogo variant="header" />
+    <p className="mt-4 text-xs uppercase tracking-[0.16em] text-skybrand-700">Loading view</p>
     <p className="mt-2 text-sm font-semibold text-slate-700">Preparing dashboard experience...</p>
   </div>
 )
@@ -42,6 +46,7 @@ function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/faqs" element={<FaqPage />} />
           <Route path="/login" element={<LoginPage />} />
 

@@ -14,31 +14,40 @@ import { formatRate, formatTZS } from '../utils/formatters'
  *   TZS → Foreign : amount / selling_rate  (bureau sells foreign to you)
  *   Cross-currency: Foreign_A → TZS → Foreign_B
  */
-function calcConversion({ amount, fromRate, toRate, mode }) {
-  const n = Number(amount) || 0
-  if (!fromRate || !toRate || n <= 0) return { result: 0, rate: 0, fee: 0 }
-
-  let result
-  let effectiveRate
-
-  if (mode === 'buy') {
-    // Customer buys foreign → bureau sells at selling_rate
-    result = n / toRate.selling_rate
-    effectiveRate = toRate.selling_rate
-  } else {
-    // Customer sells foreign → bureau buys at buying_rate
-    result = n * fromRate.buying_rate
-    effectiveRate = fromRate.buying_rate
-  }
-
-  const fee = result * 0.002 // 0.2% service fee indicator
-  return { result, effectiveRate, fee }
-}
-
 const MODE_OPTIONS = [
   { value: 'sell', label: 'I\'m Selling (to bureau)' },
   { value: 'buy', label: 'I\'m Buying (from bureau)' },
 ]
+
+function CurrencySelect({ value, onChange, label, currencyOptions }) {
+  return (
+    <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+      {label}
+      <div className="relative flex items-center">
+        <img
+          src={getFlagUrl(value)}
+          alt={value}
+          className="absolute left-3 h-4 w-6 rounded-sm object-cover"
+        />
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full min-w-0 rounded-xl border border-skybrand-200 bg-white py-3 pl-11 pr-3 text-sm outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
+        >
+          {/* TZS base option */}
+          <option value="TZS">TZS — TANZANIAN SHILLINGS</option>
+          {currencyOptions
+            .filter((o) => o.code !== 'TZS')
+            .map((o) => (
+              <option key={o.code} value={o.code}>
+                {o.code} — {o.name}
+              </option>
+            ))}
+        </select>
+      </div>
+    </label>
+  )
+}
 
 export default function ForexCalculatorPanel({ full = false }) {
   useRates()
@@ -114,34 +123,6 @@ export default function ForexCalculatorPanel({ full = false }) {
     ].slice(0, 10))
   }
 
-  const CurrencySelect = ({ value, onChange, label }) => (
-    <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
-      {label}
-      <div className="relative flex items-center">
-        <img
-          src={getFlagUrl(value)}
-          alt={value}
-          className="absolute left-3 h-4 w-6 rounded-sm object-cover"
-        />
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 rounded-xl border border-skybrand-200 bg-white py-3 pl-11 pr-3 text-sm outline-none focus:border-skybrand-400 focus:ring-2 focus:ring-skybrand-100"
-        >
-          {/* TZS base option */}
-          <option value="TZS">TZS — TANZANIAN SHILLINGS</option>
-          {currencyOptions
-            .filter((o) => o.code !== 'TZS')
-            .map((o) => (
-              <option key={o.code} value={o.code}>
-                {o.code} — {o.name}
-              </option>
-            ))}
-        </select>
-      </div>
-    </label>
-  )
-
   return (
     <section className="glass-surface overflow-hidden rounded-3xl p-4 sm:p-5 lg:p-7">
       {/* Branch context */}
@@ -194,7 +175,7 @@ export default function ForexCalculatorPanel({ full = false }) {
 
           {/* Currency pair */}
           <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-2">
-            <CurrencySelect value={fromCode} onChange={setFromCode} label="From" />
+            <CurrencySelect value={fromCode} onChange={setFromCode} label="From" currencyOptions={currencyOptions} />
             <motion.button
               onClick={swap}
               whileTap={{ rotate: 180 }}
@@ -204,7 +185,7 @@ export default function ForexCalculatorPanel({ full = false }) {
             >
               <FiRepeat size={16} />
             </motion.button>
-            <CurrencySelect value={toCode} onChange={setToCode} label="To" />
+            <CurrencySelect value={toCode} onChange={setToCode} label="To" currencyOptions={currencyOptions} />
           </div>
 
           <button

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FiBarChart2, FiTrendingUp, FiTarget } from 'react-icons/fi'
+import { FiBarChart2, FiTarget } from 'react-icons/fi'
 
 export default function AnalyticsPreview() {
   const metrics = [
