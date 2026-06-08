@@ -4,13 +4,15 @@ export default function WingaForexLogo({ variant = 'default' }) {
   const isHeader = variant === 'header'
   const isFooter = variant === 'footer'
 
+  const baseClasses = "flex items-center justify-center overflow-hidden border border-sky-100/90 bg-white"
+
   return (
     <Link to="/" className={`flex items-center ${isHeader ? 'gap-2.5 md:gap-3.5' : 'gap-3'}`} aria-label="Winga Forex Bureau Home">
-      <div className={`flex items-center justify-center overflow-hidden border border-sky-100/90 bg-white ${isHeader ? 'h-11 w-11 rounded-2xl p-1.5 shadow-[0_10px_28px_rgba(15,23,42,0.08)] md:h-12 md:w-12' : 'h-14 w-14 rounded-2xl p-2 shadow-xl md:h-20 md:w-20'}`}>
+      <div className={`${baseClasses} ${isHeader ? 'h-11 w-11 rounded-full p-2 shadow-[0_10px_28px_rgba(15,23,42,0.08)] md:h-12 md:w-12' : 'h-14 w-14 rounded-full p-2.5 shadow-xl md:h-20 md:w-20'}`}>
         <img
-          src="/assets/winga-logo.png"
+          src="/assets/winga-logo.jpg"
           alt="Winga Forex Bureau Official Logo"
-          loading="lazy"
+          loading="eager"
           decoding="async"
           className="h-full w-full object-contain"
         />

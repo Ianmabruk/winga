@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     q: 'What are your operating hours?',
-    a: 'Monday to Friday: 8:00 AM – 6:00 PM. Saturday: 9:00 AM – 3:00 PM. Closed on Sundays and public holidays.',
+    a: 'Monday – Sunday: 8:00 AM – 8:00 PM. We are open every day for your convenience.',
   },
   {
     q: 'Do you offer better rates for large transactions?',
@@ -78,9 +78,9 @@ export default function FaqSection() {
             <div className="rounded-2xl bg-gradient-to-br from-skybrand-600 to-skybrand-800 p-6 text-white">
               <p className="font-bold mb-1">Still have questions?</p>
               <p className="text-skybrand-200 text-sm mb-4">Our team is happy to help you with anything.</p>
-              <a href="tel:+255000000000"
-                className="inline-flex items-center gap-2 rounded-xl bg-white/20 border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/30 transition">
-                Call Us Now
+<a href="tel:+255740800820"
+                 className="inline-flex items-center gap-2 rounded-xl bg-white/20 border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/30 transition">
+                Call or WhatsApp Us
               </a>
             </div>
           </motion.div>

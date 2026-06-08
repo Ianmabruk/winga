@@ -34,18 +34,23 @@ export default function ContactPage() {
         </div>
         <h1 className="font-display text-3xl text-slate-900">Contact Us</h1>
         <p className="mt-3 max-w-xl text-sm leading-6 text-slate-700">Speak to our bureau team for rates, business treasury support, and operational guidance.</p>
+        <p className="mt-2 text-xs text-skybrand-600">We are available Monday – Sunday, 8:00 AM – 8:00 PM</p>
         <div className="mt-8 grid gap-4 text-sm text-slate-700">
           <div>
-            <p className="font-semibold text-slate-900">Office</p>
-            <p>P.O. Box 10581, Arusha</p>
+            <p className="font-semibold text-slate-900">Call or WhatsApp:</p>
+            <p><a href="tel:+255740800820" className="text-skybrand-700 hover:underline">+255 740 800 820</a></p>
           </div>
           <div>
-            <p className="font-semibold text-slate-900">Phone</p>
-            <p><a href="tel:+255768024017" className="text-skybrand-700 hover:underline">+255 768 024 017</a></p>
+            <p className="font-semibold text-slate-900">Sales & Marketing:</p>
+            <p><a href="tel:+255740800890" className="text-skybrand-700 hover:underline">+255 740 800 890</a></p>
           </div>
           <div>
-            <p className="font-semibold text-slate-900">Email</p>
-            <p><a href="mailto:wingaforex@gmail.com" className="text-skybrand-700 hover:underline">wingaforex@gmail.com</a></p>
+            <p className="font-semibold text-slate-900">Email:</p>
+            <p><a href="mailto:info@wingaforex.co.tz" className="text-skybrand-700 hover:underline">info@wingaforex.co.tz</a></p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900">Business Hours:</p>
+            <p>Monday – Sunday<br />8:00 AM – 8:00 PM</p>
           </div>
         </div>
       </article>

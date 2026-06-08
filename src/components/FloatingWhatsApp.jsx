@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { FiX } from 'react-icons/fi'
 
-const WHATSAPP_NUMBER = '255000000000'
+const WHATSAPP_NUMBER = '255740800820'
 const DEFAULT_MSG = 'Hello Winga Forex Bureau! I would like to inquire about your exchange rates.'
 
 export default function FloatingWhatsApp() {

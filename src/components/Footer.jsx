@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FaInstagram, FaLinkedin, FaXTwitter, FaFacebook, FaWhatsapp } from 'react-icons/fa6'
-import { FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi'
+import { FiPhone, FiMail, FiClock } from 'react-icons/fi'
 import WingaForexLogo from './WingaForexLogo'
 
 const quickLinks = [
@@ -44,7 +44,7 @@ export default function Footer() {
                 { icon: FaInstagram, label: 'Instagram', href: '#' },
                 { icon: FaXTwitter, label: 'Twitter/X', href: '#' },
                 { icon: FaLinkedin, label: 'LinkedIn', href: '#' },
-                { icon: FaWhatsapp, label: 'WhatsApp', href: 'https://wa.me/255000000000' },
+                { icon: FaWhatsapp, label: 'WhatsApp', href: 'https://wa.me/255740800820' },
               ].map(({ icon: Icon, label, href }) => (
                 <a key={label} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
                   className="h-8 w-8 rounded-lg bg-skybrand-800 flex items-center justify-center text-slate-300 hover:bg-skybrand-600 hover:text-white transition-all duration-200">
@@ -83,20 +83,32 @@ export default function Footer() {
             <p className="text-xs font-bold uppercase tracking-widest text-accent-400 mb-4">Contact Us</p>
             <ul className="grid gap-3">
               <li className="flex items-start gap-2.5">
-                <FiMapPin size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
-                <span className="text-sm text-slate-400">P.O. Box 10581, Arusha</span>
+                <FiMail size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
+                <div>
+                  <span className="text-xs text-slate-500 block">Email:</span>
+                  <a href="mailto:info@wingaforex.co.tz" className="text-sm text-slate-400 hover:text-white transition">info@wingaforex.co.tz</a>
+                </div>
               </li>
-              <li className="flex items-center gap-2.5">
-                <FiPhone size={14} className="shrink-0 text-skybrand-400" />
-                <a href="tel:+255768024017" className="text-sm text-slate-400 hover:text-white transition">+255 768 024 017</a>
+              <li className="flex items-start gap-2.5">
+                <FiPhone size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
+                <div>
+                  <span className="text-xs text-slate-500 block">Call or WhatsApp:</span>
+                  <a href="tel:+255740800820" className="text-sm text-slate-400 hover:text-white transition">+255 740 800 820</a>
+                </div>
               </li>
-              <li className="flex items-center gap-2.5">
-                <FiMail size={14} className="shrink-0 text-skybrand-400" />
-                <a href="mailto:wingaforex@gmail.com" className="text-sm text-slate-400 hover:text-white transition">wingaforex@gmail.com</a>
+              <li className="flex items-start gap-2.5">
+                <FiPhone size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
+                <div>
+                  <span className="text-xs text-slate-500 block">Sales & Marketing:</span>
+                  <a href="tel:+255740800890" className="text-sm text-slate-400 hover:text-white transition">+255 740 800 890</a>
+                </div>
               </li>
               <li className="flex items-start gap-2.5">
                 <FiClock size={14} className="mt-0.5 shrink-0 text-skybrand-400" />
-                <span className="text-sm text-slate-400">Mon–Fri: 8am–6pm<br />Sat: 9am–3pm</span>
+                <div>
+                  <span className="text-xs text-slate-500 block">Business Hours:</span>
+                  <span className="text-sm text-slate-400">Monday – Sunday<br />8:00 AM – 8:00 PM</span>
+                </div>
               </li>
             </ul>
           </div>
