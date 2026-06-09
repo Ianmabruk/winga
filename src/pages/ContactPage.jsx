@@ -28,8 +28,8 @@ export default function ContactPage() {
         <div className="mb-6 inline-flex items-center gap-3 rounded-3xl bg-skybrand-50 px-4 py-3">
           <WingaForexLogo variant="footer" />
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-skybrand-700">Winga Forex Bureau</p>
-            <p className="text-sm text-slate-600">BEST RATES BEST SERVICES</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-wingaOrange font-semibold">Winga Forex Bureau</p>
+            <p className="text-sm text-wingaBlue font-semibold">BEST RATES BEST SERVICES</p>
           </div>
         </div>
         <h1 className="font-display text-3xl text-slate-900">Contact Us</h1>

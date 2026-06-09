@@ -8,7 +8,7 @@ export default function WingaForexLogo({ variant = 'default' }) {
 
   return (
     <Link to="/" className={`flex items-center ${isHeader ? 'gap-2.5 md:gap-3.5' : 'gap-3'}`} aria-label="Winga Forex Bureau Home">
-      <div className={`${baseClasses} ${isHeader ? 'h-11 w-11 rounded-full p-2 shadow-[0_10px_28px_rgba(15,23,42,0.08)] md:h-12 md:w-12' : 'h-14 w-14 rounded-full p-2.5 shadow-xl md:h-20 md:w-20'}`}>
+      <div className={`${baseClasses} ${isHeader ? 'h-12 w-12 rounded-full p-1 shadow-[0_10px_28px_rgba(15,23,42,0.08)] md:h-12 md:w-12' : 'h-14 w-14 rounded-full p-1.5 shadow-xl md:h-20 md:w-20'}`}>
         <img
           src="/assets/winga-logo.jpg"
           alt="Winga Forex Bureau Official Logo"
@@ -22,31 +22,31 @@ export default function WingaForexLogo({ variant = 'default' }) {
         {isHeader ? (
           <>
             <div className="flex min-w-0 flex-col leading-none">
-              <span className="truncate text-[0.95rem] font-semibold tracking-[0.18em] text-slate-950 md:text-[1.02rem]">
+              <span className="truncate text-[0.95rem] font-bold tracking-[0.18em] text-wingaOrange md:text-[1.02rem]">
                 WINGA
               </span>
-              <span className="mt-1 truncate text-[0.74rem] font-medium tracking-[0.12em] text-slate-500 md:text-[0.8rem]">
+              <span className="mt-1 truncate text-[0.74rem] font-semibold tracking-[0.12em] text-wingaBlue md:text-[0.8rem]">
                 FOREX BUREAU
               </span>
             </div>
-            <div className="mt-2 hidden items-center gap-2 text-[0.63rem] font-medium uppercase tracking-[0.18em] text-slate-400 xl:flex">
+            <div className="mt-2 hidden items-center gap-2 text-[0.63rem] font-semibold uppercase tracking-[0.18em] text-wingaBlue xl:flex">
               <span>BEST RATES BEST SERVICES</span>
             </div>
-            <div className="mt-1 text-[0.68rem] font-medium tracking-[0.08em] text-slate-500 md:hidden">
+            <div className="mt-1 text-[0.68rem] font-semibold tracking-[0.08em] text-wingaBlue md:hidden">
               BEST RATES BEST SERVICES
             </div>
           </>
         ) : (
           <>
             <div className="flex min-w-0 flex-col leading-tight">
-              <span className={`truncate font-semibold tracking-[0.14em] text-white ${isFooter ? 'text-sm md:text-base' : 'text-lg md:text-xl text-sky-900'}`}>
+              <span className={`truncate font-bold tracking-[0.14em] text-white ${isFooter ? 'text-sm md:text-base' : 'text-lg md:text-xl text-wingaOrange'}`}>
                 WINGA
               </span>
-              <span className={`truncate text-sm font-medium tracking-[0.08em] ${isFooter ? 'text-slate-400' : 'text-slate-500 md:text-base'}`}>
+              <span className={`truncate text-sm font-semibold tracking-[0.08em] ${isFooter ? 'text-slate-400' : 'text-wingaBlue md:text-base'}`}>
                 FOREX BUREAU
               </span>
             </div>
-            <p className={`mt-1 text-[0.68rem] font-medium uppercase tracking-[0.18em] ${isFooter ? 'text-slate-500' : 'text-sky-700'}`}>
+            <p className={`mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] ${isFooter ? 'text-slate-500' : 'text-wingaBlue'}`}>
               BEST RATES BEST SERVICES
             </p>
           </>

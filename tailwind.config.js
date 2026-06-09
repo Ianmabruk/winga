@@ -4,6 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
+        wingaOrange: '#FF7A00',
+        wingaBlue: '#0057B8',
         // Winga primary sky blue #0284C7
         skybrand: {
           50: '#f0f9ff',
