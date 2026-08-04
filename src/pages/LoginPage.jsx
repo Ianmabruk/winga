@@ -7,7 +7,7 @@ import WingaForexLogo from '../components/WingaForexLogo'
 export default function LoginPage() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
-  const [form, setForm] = useState({ email: 'admin@wingaforex.co.tz', password: 'Admin@12345' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await http.post('/auth/login', form)
+      const response = await http.post('auth/login', form)
       setAuth(response.data)
       navigate(response.data?.user?.role === 'admin' ? '/admin' : '/dashboard')
     } catch (submitError) {
@@ -37,8 +37,8 @@ export default function LoginPage() {
           <p className="mt-3 text-sm text-white/85">Modern forex command center with role-based security, audit trails, and real-time analytics.</p>
         </div>
         <div className="rounded-2xl border border-white/30 bg-white/10 p-3 text-xs">
-          <p className="font-semibold">Demo admin: admin@wingaforex.co.tz / Admin@12345</p>
-          <p className="mt-1 font-semibold">Demo user: client@wingaforex.co.tz / Client@12345</p>
+          <p className="font-semibold">Secure, audited access.</p>
+          <p className="mt-1">Authorized personnel only. All login attempts are logged.</p>
         </div>
       </div>
 

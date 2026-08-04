@@ -1,11 +1,9 @@
-import { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { FiStar, FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
-import { getFlagUrl } from '../data/flags'
 import { formatDateTime, formatRate, spreadPercent } from '../utils/formatters'
 import { useForexStore } from '../store/useForexStore'
-
-const SparklineChart = lazy(() => import('./SparklineChart'))
+import SparklineChart from './SparklineChart'
+import Flag from './Flag'
 
 export default function CurrencyCard({ rate, prev }) {
   const { favorites, toggleFavorite, changedCurrencies } = useForexStore()
@@ -24,13 +22,12 @@ export default function CurrencyCard({ rate, prev }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`relative overflow-hidden rounded-2xl border bg-white/95 p-4 shadow-sm transition-all ${
+      className={`relative overflow-hidden rounded-2xl border bg-white/95 p-5 shadow-sm transition-all ${
         isChanged
           ? 'border-skybrand-400 shadow-[0_0_16px_rgba(37,99,235,0.18)]'
           : 'border-cyanice hover:border-skybrand-200 hover:shadow-glass'
       }`}
     >
-      {/* Glow overlay on rate change */}
       {isChanged && (
         <motion.div
           className="absolute inset-0 rounded-2xl bg-skybrand-400/5 pointer-events-none"
@@ -40,16 +37,9 @@ export default function CurrencyCard({ rate, prev }) {
         />
       )}
 
-      {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <img
-            src={getFlagUrl(rate.currency_code)}
-            alt={`${rate.currency_code} flag`}
-            className="h-4 w-6 rounded-sm object-cover shadow-sm"
-            loading="lazy"
-            onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-          />
+          <Flag code={rate.currency_code} size="md" className="flex-shrink-0" />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-slate-900">{rate.currency_code}</p>
           </div>
@@ -65,55 +55,50 @@ export default function CurrencyCard({ rate, prev }) {
         </button>
       </div>
 
-      {/* Currency actual name */}
       <p className="mt-1 truncate text-xs text-slate-500">{rate.currency_actual_name}</p>
 
-      {/* Rates */}
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-green-50 px-2 py-2">
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-green-50 px-4 py-4">
           <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-green-700">BUY</p>
           <div className="flex min-w-0 items-center gap-1">
-            {buyChanged && (
-              buyUp
-                ? <FiTrendingUp size={11} className="text-green-500" />
-                : <FiTrendingDown size={11} className="text-red-500" />
-            )}
-            <p
-              className={`text-base font-bold leading-tight transition-colors ${
-                buyChanged ? (buyUp ? 'text-green-600' : 'text-red-500') : 'text-slate-900'
-              } overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(0.84rem,2.7vw,1.02rem)]`}
-            >
-              {formatRate(rate.buying_rate)}
-            </p>
-          </div>
+              {buyChanged && (
+                buyUp
+                  ? <FiTrendingUp size={11} className="text-green-500 flex-shrink-0" />
+                  : <FiTrendingDown size={11} className="text-red-500 flex-shrink-0" />
+              )}
+              <p
+                className={`text-base font-bold leading-tight transition-colors ${
+                  buyChanged ? (buyUp ? 'text-green-600' : 'text-red-500') : 'text-slate-900'
+                } whitespace-nowrap text-[clamp(0.92rem,3vw,1.15rem)]`}
+              >
+                {formatRate(rate.buying_rate)}
+              </p>
+            </div>
         </div>
 
-        <div className="rounded-xl bg-sky-50 px-2 py-2">
+        <div className="rounded-xl bg-sky-50 px-4 py-4">
           <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-sky-700">SELL</p>
           <div className="flex min-w-0 items-center gap-1">
-            {sellChanged && (
-              sellUp
-                ? <FiTrendingUp size={11} className="text-green-500" />
-                : <FiTrendingDown size={11} className="text-red-500" />
-            )}
-            <p
-              className={`text-base font-bold leading-tight transition-colors ${
-                sellChanged ? (sellUp ? 'text-green-600' : 'text-red-500') : 'text-slate-900'
-              } overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(0.84rem,2.7vw,1.02rem)]`}
-            >
-              {formatRate(rate.selling_rate)}
-            </p>
-          </div>
+              {sellChanged && (
+                sellUp
+                  ? <FiTrendingUp size={11} className="text-green-500 flex-shrink-0" />
+                  : <FiTrendingDown size={11} className="text-red-500 flex-shrink-0" />
+              )}
+              <p
+                className={`text-base font-bold leading-tight transition-colors ${
+                  sellChanged ? (sellUp ? 'text-green-600' : 'text-red-500') : 'text-slate-900'
+                } whitespace-nowrap text-[clamp(0.92rem,3vw,1.15rem)]`}
+              >
+                {formatRate(rate.selling_rate)}
+              </p>
+            </div>
         </div>
       </div>
 
       <div className="mt-3 h-12 overflow-hidden rounded-lg border border-skybrand-100/70 bg-skybrand-50/50 px-1">
-        <Suspense fallback={<div className="h-full w-full animate-pulse rounded bg-skybrand-100/60" />}>
-          <SparklineChart up={sellUp || (!sellChanged && true)} value={rate.selling_rate || 1} />
-        </Suspense>
+        <SparklineChart up={sellUp || (!sellChanged && true)} value={rate.selling_rate || 1} />
       </div>
 
-      {/* Spread */}
       <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
         <span className="whitespace-nowrap">Spread {spread.toFixed(2)}%</span>
         <span className="text-slate-400">TZS</span>

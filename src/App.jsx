@@ -39,7 +39,8 @@ function App() {
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/market" element={<MarketPage />} />
+          <Route path="/market" element={<Navigate to="/rates-dashboard" replace />} />
+          <Route path="/rates-dashboard" element={<MarketPage />} />
           <Route path="/rates" element={<LiveRatesPage />} />
           <Route path="/live-rates" element={<Navigate to="/rates" replace />} />
           <Route path="/calculator" element={<CalculatorPage />} />

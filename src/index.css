@@ -160,7 +160,6 @@ a {
 }
 
 
-
 /* Global responsive safety */
 html, body, #root {
   width: 100%;
@@ -170,6 +169,19 @@ html, body, #root {
 img, svg, video, canvas, iframe {
   max-width: 100%;
   display: block;
+}
+
+/* Standard flag container - prevents cropping */
+.flag-container {
+  overflow: visible !important;
+}
+
+.flag-safe {
+  object-fit: contain;
+  object-position: center;
+  width: auto;
+  height: auto;
+  max-width: 100%;
 }
 
 table {
@@ -239,4 +251,24 @@ th {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
+}
+
+/* Large number handling - prevents overflow in converter */
+.converter-result {
+  font-size: clamp(1rem, 4vw, 1.6rem);
+  line-height: 1.2;
+}
+
+/* Ensure values never clip in tables or cards */
+.rate-value {
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+}
+
+/* Prevent flag cropping */
+.flag-img {
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
 }

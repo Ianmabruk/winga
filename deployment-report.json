@@ -1,0 +1,129 @@
+{
+  "generatedAt": "2026-07-09T16:09:46.735Z",
+  "frontendDir": "/home/ian-mabruk/burea/burea",
+  "distDir": "/home/ian-mabruk/burea/burea/dist",
+  "buildStatus": "present",
+  "htaccessPresent": true,
+  "routingValidation": {
+    "routesTested": 22,
+    "total": 22,
+    "problems": []
+  },
+  "assetValidation": {
+    "rootRelative": true
+  },
+  "api": {
+    "configuredUrl": "https://winga-backend.onrender.com",
+    "checks": [
+      {
+        "name": "VITE_API_URL configured",
+        "ok": true,
+        "detail": "https://winga-backend.onrender.com"
+      },
+      {
+        "name": "GET /health",
+        "ok": true,
+        "detail": "HTTP 200"
+      },
+      {
+        "name": "GET /api/rates/live?branch=HEAD OFFICE",
+        "ok": null,
+        "detail": "unreachable / offline (skipped)"
+      }
+    ]
+  },
+  "results": [
+    {
+      "name": "dist/.htaccess present",
+      "ok": true,
+      "detail": "/home/ian-mabruk/burea/burea/dist/.htaccess",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: RewriteEngine On",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: RewriteBase /",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: RewriteRule ^index\\.html$ - [L]",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: !-f condition",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: !-d condition",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: RewriteRule . /index.html [L]",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: ErrorDocument 404 /index.html",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": "dist/index.html present",
+      "ok": true,
+      "detail": "/home/ian-mabruk/burea/burea/dist/index.html",
+      "critical": true
+    },
+    {
+      "name": "All index.html asset references resolve",
+      "ok": true,
+      "detail": "8 local refs checked",
+      "critical": true
+    },
+    {
+      "name": "Asset paths are root-relative (base \"/\")",
+      "ok": true,
+      "detail": "refreshes on sub-routes cannot blank-page",
+      "critical": true
+    },
+    {
+      "name": "All routes fall back to index.html on refresh",
+      "ok": true,
+      "detail": "22 routes validated (incl. /projects, /about, /contact)",
+      "critical": true
+    },
+    {
+      "name": "No SSR dependency (client-only SPA)",
+      "ok": true,
+      "detail": "index.html mounts #root; no ReactDOMServer usage",
+      "critical": true
+    },
+    {
+      "name": "Deployment package carries .htaccess",
+      "ok": true,
+      "detail": "/home/ian-mabruk/burea/.cpanel-deployment/public_html-ready",
+      "critical": true
+    },
+    {
+      "name": "Deployment package carries index.html",
+      "ok": true,
+      "detail": "/home/ian-mabruk/burea/.cpanel-deployment/public_html-ready",
+      "critical": true
+    }
+  ],
+  "criticalFailures": [],
+  "status": "PASS"
+}

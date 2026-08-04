@@ -9,11 +9,11 @@ export default function BranchesPage() {
 
   const query = useQuery({
     queryKey: ['admin-branches'],
-    queryFn: async () => (await http.get('/admin/branches')).data.branches,
+    queryFn: async () => (await http.get('admin/branches')).data.branches,
   })
 
   const addMutation = useMutation({
-    mutationFn: async () => http.post('/admin/branches', form),
+    mutationFn: async () => http.post('admin/branches', form),
     onSuccess: () => {
       setForm({ name: '', city: '', country: 'Kenya', status: 'active' })
       queryClient.invalidateQueries({ queryKey: ['admin-branches'] })
@@ -21,7 +21,7 @@ export default function BranchesPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async (id) => http.delete(`/admin/branches/${id}`),
+      mutationFn: async (id) => http.delete(`admin/branches/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-branches'] }),
   })
 

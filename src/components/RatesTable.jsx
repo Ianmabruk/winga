@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiChevronUp, FiChevronDown, FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
-import { getFlagUrl } from '../data/flags'
 import { formatRate, formatDateTime, spreadPercent } from '../utils/formatters'
 import { useForexStore } from '../store/useForexStore'
+import Flag from './Flag'
 
 const SORT_FIELDS = {
   sequence: (a, b) => a.currency_sequence - b.currency_sequence,
@@ -23,7 +23,7 @@ function SortIcon({ active, dir }) {
 }
 
 export default function RatesTable({ data = [], isLoading }) {
-  const { searchQuery, changedCurrencies, previousRatesMap, favorites } = useForexStore()
+  const { searchQuery, previousRatesMap, favorites } = useForexStore()
   const [sortField, setSortField] = useState('sequence')
   const [sortDir, setSortDir] = useState('asc')
 
@@ -112,7 +112,6 @@ export default function RatesTable({ data = [], isLoading }) {
           <AnimatePresence initial={false}>
             {rows.map((rate, idx) => {
               const prev = previousRatesMap[rate.currency_code]
-              const changed = changedCurrencies.includes(rate.currency_code)
               const buyUp = prev && rate.buying_rate > prev.buying_rate
               const buyDown = prev && rate.buying_rate < prev.buying_rate
               const sellUp = prev && rate.selling_rate > prev.selling_rate
@@ -125,42 +124,28 @@ export default function RatesTable({ data = [], isLoading }) {
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`border-b border-slate-50 transition-colors ${
-                    changed ? 'bg-skybrand-50/60' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'
-                  } hover:bg-skybrand-50/40`}
+                  className={`border-b border-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'} hover:bg-skybrand-50/40`}
                 >
-                  {/* Sequence */}
                   <td className="px-3 py-3 text-center text-xs text-slate-400 whitespace-nowrap">
                     {isFav ? '★' : rate.currency_sequence}
                   </td>
 
-                  {/* Currency code + flag */}
                   <td className="px-3 py-3">
                     <div className="flex min-w-0 items-center gap-2.5">
-                      <img
-                        src={getFlagUrl(rate.currency_code)}
-                        alt={rate.currency_code}
-                        className="h-4 w-6 rounded-sm object-cover"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-                      />
-                      <div className="min-w-0">
-                        <span className="block truncate font-bold text-slate-900">{rate.currency_code}</span>
-                        <span className="ml-1.5 hidden max-w-[120px] truncate text-xs text-slate-500 sm:inline-block">
-                          {rate.currency_name}
-                        </span>
+                      <Flag code={rate.currency_code} size="md" className="flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <span className="block font-bold text-slate-900">{rate.currency_code}</span>
+                        <span className="block text-xs text-slate-500 truncate">{rate.currency_name}</span>
                       </div>
                     </div>
                   </td>
 
-                  {/* Full name */}
                   <td className="hidden px-3 py-3 text-slate-600 lg:table-cell">
                     <span className="block max-w-[260px] break-words text-sm leading-5">
                       {rate.currency_actual_name}
                     </span>
                   </td>
 
-                  {/* Buying rate */}
                   <td className="px-3 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       {buyUp && <FiTrendingUp size={11} className="text-green-500" />}
@@ -175,7 +160,6 @@ export default function RatesTable({ data = [], isLoading }) {
                     </div>
                   </td>
 
-                  {/* Selling rate */}
                   <td className="px-3 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       {sellUp && <FiTrendingUp size={11} className="text-green-500" />}
@@ -190,12 +174,10 @@ export default function RatesTable({ data = [], isLoading }) {
                     </div>
                   </td>
 
-                  {/* Spread */}
                   <td className="hidden px-3 py-3 text-right text-xs text-slate-500 md:table-cell whitespace-nowrap">
                     {spreadPercent(rate.buying_rate, rate.selling_rate).toFixed(2)}%
                   </td>
 
-                  {/* Last updated */}
                   <td className="hidden px-3 py-3 text-right text-xs text-slate-400 xl:table-cell whitespace-nowrap">
                     {formatDateTime(rate.effective_date_and_time)}
                   </td>

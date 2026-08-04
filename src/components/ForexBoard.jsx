@@ -1,4 +1,4 @@
-import { lazy, Suspense, useDeferredValue, useMemo, useState } from 'react'
+import { useEffect, useDeferredValue, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiRefreshCw, FiClock, FiWifi, FiWifiOff } from 'react-icons/fi'
 import { useRates } from '../hooks/useRates'
@@ -7,8 +7,7 @@ import { formatTime } from '../utils/formatters'
 import BranchSelector from './BranchSelector'
 import SearchBar from './SearchBar'
 import { CurrencyCardSkeleton } from './LoadingSkeleton'
-
-const CurrencyCard = lazy(() => import('./CurrencyCard'))
+import CurrencyCard from './CurrencyCard'
 
 const POPULAR = ['USD', 'EUR', 'GBP', 'AED', 'KES']
 const AFRICAN = ['KES', 'UGX', 'RWF', 'ZAR', 'BWP', 'NAD']
@@ -32,9 +31,14 @@ export default function ForexBoard() {
     searchQuery,
     selectedBranch,
     favorites,
+    setSearchQuery,
   } = useForexStore()
   const [group, setGroup] = useState('all')
   const deferredSearch = useDeferredValue(searchQuery)
+
+  useEffect(() => {
+    setSearchQuery('')
+  }, [setSearchQuery])
 
   const visibleRates = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase()
@@ -71,7 +75,6 @@ export default function ForexBoard() {
 
   return (
     <section className="grid gap-4">
-      {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <BranchSelector />
@@ -97,6 +100,19 @@ export default function ForexBoard() {
         </div>
       </div>
 
+      {isError && !hasData && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Live rates are currently unavailable</p>
+          <p className="mt-1">Unable to connect to the Winga live rate feed. Please check your connection and try again later.</p>
+        </div>
+      )}
+      {isError && hasData && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold">Connection interrupted — showing last successful rates</p>
+          <p className="mt-1">Retrying automatically to restore live Winga pricing.</p>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {[
           ['all', 'All'],
@@ -118,7 +134,6 @@ export default function ForexBoard() {
         ))}
       </div>
 
-      {/* Status bar */}
       <div className="flex items-center justify-between rounded-xl border border-cyanice bg-white/80 px-4 py-2 text-xs">
         <div className="flex items-center gap-2 text-slate-500">
           <FiClock size={12} />
@@ -134,7 +149,6 @@ export default function ForexBoard() {
         </div>
       </div>
 
-      {/* Error banner — but keep previous data visible */}
       {isError && hasData && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -145,7 +159,6 @@ export default function ForexBoard() {
         </motion.div>
       )}
 
-      {/* Error with no data */}
       {isError && !hasData && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
           <p className="font-semibold text-amber-800">Unable to load exchange rates</p>
@@ -171,19 +184,24 @@ export default function ForexBoard() {
               <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">{bucket.label}</h3>
               <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                 {bucket.items.map((rate) => (
-                  <Suspense key={rate.currency_code} fallback={<CurrencyCardSkeleton />}>
-                    <CurrencyCard
-                      rate={rate}
-                      prev={previousRatesMap[rate.currency_code]}
-                    />
-                  </Suspense>
+                  <CurrencyCard
+                    key={rate.currency_code}
+                    rate={rate}
+                    prev={previousRatesMap[rate.currency_code]}
+                  />
                 ))}
               </div>
             </div>
           ))}
       </div>
 
-      {/* No results from search */}
+      {!isLoading && !hasData && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-center">
+          <p className="font-semibold text-amber-800">No exchange rates available</p>
+          <p className="mt-1 text-sm text-amber-700">No exchange rates available for the selected branch.</p>
+        </div>
+      )}
+
       {!isLoading && visibleRates.length === 0 && hasData && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
           <p className="text-sm text-slate-600">No currencies match <strong>"{searchQuery}"</strong></p>

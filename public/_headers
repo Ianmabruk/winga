@@ -8,4 +8,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://i.ibb.co https://flagcdn.com; connect-src 'self' https://forex.wingaforex.co.tz; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://i.ibb.co https://flagcdn.com; connect-src 'self' https://winga-backend.onrender.com https://forex.wingaforex.co.tz https://open.er-api.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+
+  # Prevent caching of API and rate data across all browsers (Chrome fix)
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0

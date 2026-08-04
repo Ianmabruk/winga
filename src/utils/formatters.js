@@ -19,12 +19,18 @@ export const formatTZS = (value, decimals = 2) => {
  * Rates < 1 get 4 dp, rates >= 1 get 2 dp.
  */
 export const formatRate = (value) => {
-  if (value === null || value === undefined || isNaN(value)) return '—'
-  const dp = value < 1 ? 4 : 2
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: dp,
-    maximumFractionDigits: dp,
-  }).format(value)
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—'
+  const numValue = Number(value)
+  if (numValue === 0 || numValue < 0) return '—'
+  const dp = numValue < 1 ? 4 : 2
+  try {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: dp,
+      maximumFractionDigits: dp,
+    }).format(numValue)
+  } catch {
+    return numValue.toFixed(dp)
+  }
 }
 
 /**
@@ -50,7 +56,10 @@ export const formatAmount = (value, currency = 'TZS', decimals = 2) => {
 export const formatDateTime = (dateStr) => {
   if (!dateStr) return '—'
   try {
-    const d = new Date(dateStr.replace(' ', 'T'))
+    const safeStr = String(dateStr).trim()
+    const isoStr = safeStr.includes('T') ? safeStr : safeStr.replace(' ', 'T')
+    const d = new Date(isoStr)
+    if (isNaN(d.getTime())) return '—'
     return d.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -59,7 +68,7 @@ export const formatDateTime = (dateStr) => {
       second: '2-digit',
     })
   } catch {
-    return dateStr
+    return '—'
   }
 }
 

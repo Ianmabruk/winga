@@ -6,7 +6,7 @@ import WingaForexLogo from './WingaForexLogo'
 
 const links = [
 	{ to: '/', label: 'Home', end: true },
-	{ to: '/market', label: 'Market' },
+	{ to: '/rates-dashboard', label: 'Rates Dashboard' },
 	{ to: '/rates', label: 'Rates' },
 	{ to: '/services', label: 'Services' },
 	{ to: '/about', label: 'About' },

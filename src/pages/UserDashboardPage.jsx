@@ -7,7 +7,7 @@ import { http } from '../lib/http'
 export default function UserDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['user-dashboard'],
-    queryFn: async () => (await http.get('/analytics/user')).data,
+    queryFn: async () => (await http.get('analytics/user')).data,
   })
 
   const model = data || {

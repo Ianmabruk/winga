@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { FiRepeat, FiArrowRight } from 'react-icons/fi'
 import { useForexStore } from '../../store/useForexStore'
 import { getFlagUrl } from '../../data/flags'
-import { buildFallbackRatesData } from '../../data/currencies'
+import { supportedCurrencies } from '../../data/currencies'
 
 function convertAmount(amount, from, to, ratesData) {
   if (!amount || isNaN(amount)) return ''
@@ -30,9 +30,8 @@ function convertAmount(amount, from, to, ratesData) {
 }
 
 export default function CalculatorSection({ compact = false }) {
-  const storeData = useForexStore((s) => s.ratesData)
-  const ratesData = storeData && storeData.length ? storeData : buildFallbackRatesData()
-  const codes = ['TZS', ...ratesData.map((r) => r.currency_code)].filter((c, i, a) => a.indexOf(c) === i)
+  const ratesData = useForexStore((s) => s.ratesData)
+  const codes = [...new Set(supportedCurrencies)]
 
   const [from, setFrom] = useState('USD')
   const [to, setTo] = useState('TZS')

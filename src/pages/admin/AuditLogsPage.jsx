@@ -4,7 +4,7 @@ import { http } from '../../lib/http'
 export default function AuditLogsPage() {
   const query = useQuery({
     queryKey: ['admin-audit-logs'],
-    queryFn: async () => (await http.get('/admin/audit-logs')).data.logs,
+    queryFn: async () => (await http.get('admin/audit-logs')).data.logs,
   })
 
   return (

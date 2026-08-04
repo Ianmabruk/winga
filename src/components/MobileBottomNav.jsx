@@ -58,7 +58,7 @@ export default function MobileBottomNav() {
   const leftItems = useMemo(
     () => [
       { to: '/calculator', label: 'Calc', Icon: FiRepeat },
-      { to: '/market', label: 'Market', Icon: FiBarChart2 },
+      { to: '/rates-dashboard', label: 'Market', Icon: FiBarChart2 },
     ],
     [],
   )

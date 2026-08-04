@@ -1,5 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { FiAlertTriangle, FiClock, FiMapPin, FiTrendingUp, FiUsers } from 'react-icons/fi'
+import {
+  FiAlertTriangle,
+  FiClock,
+  FiDatabase,
+  FiMapPin,
+  FiTrendingUp,
+  FiUsers,
+  FiWifi,
+  FiWifiOff,
+} from 'react-icons/fi'
 import { http } from '../../lib/http'
 
 function StatCard({ title, value, hint, tone = 'sky' }) {
@@ -8,6 +17,7 @@ function StatCard({ title, value, hint, tone = 'sky' }) {
     green: 'from-emerald-500 to-emerald-700',
     amber: 'from-amber-500 to-amber-700',
     rose: 'from-rose-500 to-rose-700',
+    slate: 'from-slate-700 to-slate-900',
   }[tone]
 
   return (
@@ -20,30 +30,105 @@ function StatCard({ title, value, hint, tone = 'sky' }) {
   )
 }
 
+function StatusBadge({ status }) {
+  const config = {
+    ok: { label: 'OK', className: 'bg-emerald-50 text-emerald-700 border-emerald-200', Icon: FiWifi },
+    error: { label: 'Error', className: 'bg-rose-50 text-rose-700 border-rose-200', Icon: FiWifiOff },
+    pending: { label: 'Pending', className: 'bg-amber-50 text-amber-700 border-amber-200', Icon: FiClock },
+    connected: { label: 'Connected', className: 'bg-emerald-50 text-emerald-700 border-emerald-200', Icon: FiDatabase },
+    disconnected: { label: 'Disconnected', className: 'bg-rose-50 text-rose-700 border-rose-200', Icon: FiDatabase },
+  }
+  const item = config[status] || config.pending
+  const { label, className, Icon } = item
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${className}`}>
+      <Icon size={12} />
+      {label}
+    </span>
+  )
+}
+
+function DiagnosticsCard({ diagnostics }) {
+  if (!diagnostics) return null
+
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 className="font-display text-xl text-slate-900">System Diagnostics</h3>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">API Status</p>
+          <div className="mt-2">
+            <StatusBadge status={diagnostics.apiStatus} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Database</p>
+          <div className="mt-2">
+            <StatusBadge status={diagnostics.dbStatus} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Currencies Loaded</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900">{diagnostics.currencyCount || 0}</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Last Updated</p>
+          <p className="mt-2 text-sm font-semibold text-slate-900">
+            {diagnostics.lastUpdated ? new Date(diagnostics.lastUpdated).toLocaleString() : 'N/A'}
+          </p>
+        </div>
+      </div>
+
+      {diagnostics.lastSuccessfulSync && (
+        <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+          <p className="font-semibold">Last Successful Sync</p>
+          <p>{diagnostics.lastSuccessfulSync.message}</p>
+          <p>{new Date(diagnostics.lastSuccessfulSync.created_at).toLocaleString()}</p>
+        </div>
+      )}
+
+      {diagnostics.lastApiError && (
+        <div className="mt-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+          <p className="font-semibold">Last API Error</p>
+          <p>{diagnostics.lastApiError.message}</p>
+          <p>{new Date(diagnostics.lastApiError.created_at).toLocaleString()}</p>
+        </div>
+      )}
+    </article>
+  )
+}
+
 export default function AdminOverviewPage() {
   const analyticsQuery = useQuery({
     queryKey: ['admin-overview-analytics'],
-    queryFn: async () => (await http.get('/analytics/admin')).data,
+    queryFn: async () => (await http.get('analytics/admin')).data,
   })
 
   const usersQuery = useQuery({
     queryKey: ['admin-overview-users'],
-    queryFn: async () => (await http.get('/admin/users')).data.users,
+    queryFn: async () => (await http.get('admin/users')).data.users,
   })
 
   const kycQuery = useQuery({
     queryKey: ['admin-overview-kyc'],
-    queryFn: async () => (await http.get('/admin/kyc')).data.queue,
+    queryFn: async () => (await http.get('admin/kyc')).data.queue,
   })
 
   const branchesQuery = useQuery({
     queryKey: ['admin-overview-branches'],
-    queryFn: async () => (await http.get('/admin/branches')).data.branches,
+    queryFn: async () => (await http.get('admin/branches')).data.branches,
   })
 
   const logsQuery = useQuery({
     queryKey: ['admin-overview-audit'],
-    queryFn: async () => (await http.get('/admin/audit-logs')).data.logs,
+    queryFn: async () => (await http.get('admin/audit-logs')).data.logs,
+  })
+
+  const diagnosticsQuery = useQuery({
+    queryKey: ['admin-diagnostics'],
+    queryFn: async () => (await http.get('admin/diagnostics')).data,
+    refetchInterval: 60_000,
   })
 
   const loading =
@@ -51,9 +136,10 @@ export default function AdminOverviewPage() {
     usersQuery.isLoading ||
     kycQuery.isLoading ||
     branchesQuery.isLoading ||
-    logsQuery.isLoading
+    logsQuery.isLoading ||
+    diagnosticsQuery.isLoading
 
-  if (loading) {
+  if (loading && !analyticsQuery.data && !diagnosticsQuery.data) {
     return (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -68,11 +154,14 @@ export default function AdminOverviewPage() {
   const kyc = kycQuery.data || []
   const branches = branchesQuery.data || []
   const logs = logsQuery.data || []
+  const diagnostics = diagnosticsQuery.data || {}
 
   const activeBranches = branches.filter((row) => row.status === 'active').length
 
   return (
     <div className="grid gap-4">
+      <DiagnosticsCard diagnostics={diagnostics} />
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total Users"

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Block admin and private routes
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+# Allow public assets
+Allow: /assets/
+Allow: /favicon.ico
+Allow: /sitemap.xml
+
+# Crawl delay for polite bots
+Crawl-delay: 10

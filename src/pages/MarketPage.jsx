@@ -13,12 +13,13 @@ import {
 } from 'react-icons/fi'
 import BranchSelector from '../components/BranchSelector'
 import SparklineChart from '../components/SparklineChart'
-import { getFlagUrl } from '../data/flags'
+import { getFlagUrl, getCurrencyBadge } from '../data/flags'
 import { useBranches } from '../hooks/useBranches'
 import { useRates } from '../hooks/useRates'
 import { useForexStore } from '../store/useForexStore'
 import { movementFromRates } from '../utils/forexMath'
 import { formatRate, formatTime, spreadPercent } from '../utils/formatters'
+import Seo from '../components/Seo'
 
 const marketThemes = [
   'from-emerald-400/18 via-white to-sky-400/10',
@@ -66,8 +67,10 @@ function MetricCard({ label, value, tone, detail, Icon }) {
 
 export default function MarketPage() {
   useBranches()
-  const { isFetching } = useRates()
+  const { isFetching, isError, isFetched } = useRates()
   const { ratesData, previousRatesMap, selectedBranch, lastUpdated } = useForexStore()
+  const hasData = ratesData.length > 0
+  const isEmptyResult = isFetched && !isFetching && !hasData && !isError
 
   const marketData = useMemo(() => {
     return ratesData
@@ -129,6 +132,29 @@ export default function MarketPage() {
 
   return (
     <section className="mx-auto grid w-[min(1380px,96vw)] gap-6 px-4 py-6 md:px-6 lg:gap-8 lg:px-8 lg:py-8">
+      <Seo
+        title="Rates Dashboard | Winga Forex Bureau"
+        description="Monitor live forex market intelligence, currency momentum, buy and sell movement, and spread pressure for all currencies including USD, EUR, GBP, KES, UGX, RWF and 166+ more."
+        path="/rates-dashboard"
+      />
+      {isError && !hasData && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Live rates are currently unavailable</p>
+          <p className="mt-1">Unable to connect to the Winga live rate feed. Please check your connection and try again later.</p>
+        </div>
+      )}
+      {isError && hasData && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold">Connection interrupted — showing last successful rates</p>
+          <p className="mt-1">Retrying automatically to restore live Winga pricing.</p>
+        </div>
+      )}
+      {isEmptyResult && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-6 text-center">
+          <p className="font-semibold text-amber-800">No exchange rates available</p>
+          <p className="mt-1 text-sm text-amber-700">No exchange rates available for the selected branch.</p>
+        </div>
+      )}
       <motion.header
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -138,7 +164,7 @@ export default function MarketPage() {
         <div className="absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-skybrand-300/25 blur-3xl" />
         <div className="relative grid gap-6 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
           <div className="max-w-4xl">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-skybrand-700">Wing Market</p>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-skybrand-700">Rates Dashboard</p>
             <h1 className="mt-3 max-w-3xl font-display text-[clamp(2rem,5vw,4rem)] leading-[0.95] text-slate-950">
               Live forex intelligence with cleaner signals and faster market reads.
             </h1>
@@ -181,13 +207,13 @@ export default function MarketPage() {
                 return (
                   <article key={item.currency_code} className="rounded-2xl border border-slate-200/80 bg-white/90 p-4">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={getFlagUrl(item.currency_code)}
-                        alt={`${item.currency_code} flag`}
-                        className="h-5 w-8 rounded object-cover shadow-sm"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-                      />
+<img
+                         src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
+                         alt={`${item.currency_code} flag`}
+                         className="h-5 w-8 rounded object-cover shadow-sm"
+                         loading="lazy"
+                         onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
+                       />
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{item.currency_code}</p>
                         <p className="text-xs text-slate-500">{item.currency_actual_name}</p>
@@ -279,16 +305,16 @@ export default function MarketPage() {
                   <div>
                     <p className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-500">{label}</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <img
-                        src={getFlagUrl(item.currency_code)}
-                        alt={`${item.currency_code} flag`}
-                        className="h-4 w-6 rounded object-cover"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-                      />
+<img
+                         src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
+                         alt={`${item.currency_code} flag`}
+                         className="h-5 w-8 rounded object-cover shadow-sm"
+                         loading="lazy"
+                         onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
+                       />
                       <p className="text-base font-semibold text-slate-950">{item.currency_code}</p>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 whitespace-nowrap">
                       Buy {formatRate(item.buying_rate)} · Sell {formatRate(item.selling_rate)}
                     </p>
                   </div>
@@ -337,11 +363,11 @@ export default function MarketPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <img
-                        src={getFlagUrl(item.currency_code)}
+                        src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
                         alt={`${item.currency_code} flag`}
                         className="h-5 w-8 rounded object-cover shadow-sm"
                         loading="lazy"
-                        onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
+                        onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-slate-950">{item.currency_code}</p>
@@ -359,13 +385,13 @@ export default function MarketPage() {
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                    <div className="rounded-2xl bg-white/80 px-3 py-2">
+                    <div className="rounded-2xl bg-white/80 px-4 py-3">
                       <p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Buy</p>
-                      <p className="mt-1 font-semibold text-slate-950">{formatRate(item.buying_rate)}</p>
+                      <p className="mt-1 font-semibold text-slate-950 whitespace-nowrap text-[clamp(0.92rem,2.4vw,1.1rem)]">{formatRate(item.buying_rate)}</p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 px-3 py-2">
+                    <div className="rounded-2xl bg-white/80 px-4 py-3">
                       <p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Sell</p>
-                      <p className="mt-1 font-semibold text-slate-950">{formatRate(item.selling_rate)}</p>
+                      <p className="mt-1 font-semibold text-slate-950 whitespace-nowrap text-[clamp(0.92rem,2.4vw,1.1rem)]">{formatRate(item.selling_rate)}</p>
                     </div>
                   </div>
 

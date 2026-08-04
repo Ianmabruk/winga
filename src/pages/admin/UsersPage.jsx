@@ -9,11 +9,11 @@ export default function UsersPage() {
 
   const usersQuery = useQuery({
     queryKey: ['admin-users'],
-    queryFn: async () => (await http.get('/admin/users')).data.users,
+    queryFn: async () => (await http.get('admin/users')).data.users,
   })
 
   const createMutation = useMutation({
-    mutationFn: async () => http.post('/admin/users', form),
+    mutationFn: async () => http.post('admin/users', form),
     onSuccess: () => {
       setForm({ fullName: '', email: '', phone: '', role: 'client' })
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
@@ -21,7 +21,7 @@ export default function UsersPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async (id) => http.delete(`/admin/users/${id}`),
+      mutationFn: async (id) => http.delete(`admin/users/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
   })
 

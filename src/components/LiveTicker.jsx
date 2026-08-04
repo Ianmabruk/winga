@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
 import { useForexStore } from '../store/useForexStore'
-import { getFlagUrl } from '../data/flags'
+import { getFlagUrl, getCurrencyBadge } from '../data/flags'
 import { formatRate } from '../utils/formatters'
 
 export default function LiveTicker() {
@@ -37,13 +37,13 @@ export default function LiveTicker() {
               key={`${item.currency_code}-${idx}`}
               className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-2.5 py-1.5 font-semibold text-navysoft whitespace-nowrap"
             >
-              <img
-                src={getFlagUrl(item.currency_code)}
-                alt={item.currency_code}
-                className="h-3.5 w-5 rounded-sm object-cover"
-                loading="lazy"
-                onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-              />
+<img
+                  src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
+                  alt={item.currency_code}
+                  className="h-3.5 w-5 rounded-sm object-cover"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
+                />
               <span>{item.currency_code}/TZS</span>
               <span className="font-bold text-slate-800">{formatRate(item.selling_rate)}</span>
               {item.delta !== 0 && (

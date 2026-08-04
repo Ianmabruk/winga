@@ -4,6 +4,7 @@ import { FiArrowRight, FiTrendingUp, FiTrendingDown, FiShield, FiZap, FiGlobe } 
 import { useForexStore } from '../../store/useForexStore'
 import { getFlagUrl } from '../../data/flags'
 import { formatRate } from '../../utils/formatters'
+import forexHero from '../../assets/forex-hero-currencies.jpg'
 
 const heroRates = ['USD','EUR','GBP','AED']
 
@@ -116,42 +117,35 @@ export default function HeroSection() {
 
           {/* Right: cinematic finance visual + floating rate cards */}
           <div className="grid gap-4">
-            <motion.div
-              initial={{ opacity: 0, y: 22 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="group relative overflow-hidden rounded-[32px] border border-slate-200 bg-slate-950 shadow-[0_20px_60px_rgba(15,23,42,0.15)]"
-            >
-              <motion.img
-                initial={{ opacity: 0, scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                src="/assets/winga-hero-image.jpg"
-                alt="Safari vehicle in premium forex travel imagery"
-                className="w-full rounded-[32px] object-cover object-center transition duration-700 ease-out sm:h-[280px]"
+            {/* Hero Image */}
+            <div className="aspect-[3/2] rounded-[32px] overflow-hidden border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.15)]">
+              <img
+                src={forexHero}
+                alt="International Currency Exchange"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-slate-900/10 to-transparent" />
-            </motion.div>
+            </div>
 
+            {/* Rate Cards */}
             <div className="grid grid-cols-2 gap-4">
-            {heroRates.map((code, i) => (
-              <HeroRateCard key={code} code={code} index={i} />
-            ))}
+              {heroRates.map((code, i) => (
+                <HeroRateCard key={code} code={code} index={i} />
+              ))}
 
-            {/* Stats card */}
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
-              className="col-span-2 bg-gradient-to-r from-skybrand-600 to-skybrand-800 rounded-2xl p-5 text-white shadow-glass-lg">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                {[['25+', 'Currencies'], ['15s', 'Rate Refresh'], ['100%', 'Reliable']].map(([val, label]) => (
-                  <div key={label}>
-                    <p className="text-2xl font-extrabold">{val}</p>
-                    <p className="text-xs text-skybrand-200 mt-0.5">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
+              {/* Stats card */}
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
+                className="col-span-2 bg-gradient-to-r from-skybrand-600 to-skybrand-800 rounded-2xl p-5 text-white shadow-glass-lg">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  {[['25+', 'Currencies'], ['15s', 'Rate Refresh'], ['100%', 'Reliable']].map(([val, label]) => (
+                    <div key={label}>
+                      <p className="text-2xl font-extrabold">{val}</p>
+                      <p className="text-xs text-skybrand-200 mt-0.5">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>

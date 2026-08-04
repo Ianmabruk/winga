@@ -7,21 +7,22 @@ import { useForexStore } from '../store/useForexStore'
 import BranchSelector from '../components/BranchSelector'
 import ForexCalculatorPanel from '../components/ForexCalculatorPanel'
 import SparklineChart from '../components/SparklineChart'
-import { getFlagUrl } from '../data/flags'
+import Flag from '../components/Flag'
 import { formatDateTime, formatRate, formatTime, spreadPercent } from '../utils/formatters'
+import Seo from '../components/Seo'
 
 const revealGroup = {
   hidden: { opacity: 0, y: 18 },
-  visible: {
+  visible: (i = 1) => ({
     opacity: 1,
     y: 0,
-    transition: { staggerChildren: 0.07, delayChildren: 0.04 },
-  },
+    transition: { staggerChildren: 0.02, delayChildren: 0.01 * (i / 20) },
+  }),
 }
 
 const revealCard = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 }
 
 function RatesSummaryCard({ label, value, detail }) {
@@ -36,9 +37,11 @@ function RatesSummaryCard({ label, value, detail }) {
 
 export default function LiveRatesPage() {
   useBranches()
-  const { isFetching } = useRates()
+  const { isFetching, isError, isFetched } = useRates()
   const { selectedBranch, ratesData, previousRatesMap, lastUpdated } = useForexStore()
   const [query, setQuery] = useState('')
+  const hasData = ratesData.length > 0
+  const isEmptyResult = isFetched && !isFetching && !hasData && !isError
 
   const visibleRates = useMemo(() => {
     const term = query.trim().toLowerCase()
@@ -73,6 +76,23 @@ export default function LiveRatesPage() {
 
   return (
     <section className="mx-auto grid w-[min(1380px,96vw)] gap-6 px-4 py-6 md:px-6 lg:gap-8 lg:px-8 lg:py-8">
+      <Seo
+        title="Live Forex Exchange Rates | Winga Forex Bureau"
+        description="View live buy and sell exchange rates for USD, EUR, GBP, KES, UGX, RWF and more. Real-time forex rates updated every 15 seconds."
+        path="/rates"
+      />
+      {isError && !hasData && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Live rates are currently unavailable</p>
+          <p className="mt-1">Unable to connect to the Winga live rate feed. Please check your connection and try again later.</p>
+        </div>
+      )}
+      {isError && hasData && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold">Connection interrupted — showing last successful rates</p>
+          <p className="mt-1">Retrying automatically to restore live Winga pricing.</p>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -159,26 +179,20 @@ export default function LiveRatesPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
-            className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3"
+            className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3 max-h-[70vh] overflow-y-auto pr-2 -mr-2"
           >
             {rateCards.map((rate) => (
               <motion.article
                 key={rate.currency_code}
                 variants={revealCard}
-                className="overflow-hidden rounded-[26px] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.96))] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
+                className="overflow-hidden rounded-[26px] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.96))] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <img
-                      src={getFlagUrl(rate.currency_code)}
-                      alt={`${rate.currency_code} flag`}
-                      className="h-5 w-8 rounded object-cover shadow-sm"
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.src = '/flags/fallback.svg' }}
-                    />
-                    <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-3 flex-1">
+                    <Flag code={rate.currency_code} size="lg" className="flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-slate-950">{rate.currency_code}</p>
-                      <p className="truncate text-xs text-slate-500">{rate.currency_actual_name}</p>
+                      <p className="text-xs text-slate-500 truncate">{rate.currency_actual_name}</p>
                     </div>
                   </div>
                   <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${rate.up ? 'bg-emerald-500/12 text-emerald-700' : 'bg-rose-500/12 text-rose-700'}`}>
@@ -189,13 +203,13 @@ export default function LiveRatesPage() {
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-emerald-50 px-3 py-3">
+                  <div className="rounded-2xl bg-emerald-50 px-4 py-4">
                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-emerald-700">Buy</p>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">{formatRate(rate.buying_rate)}</p>
+                    <p className="mt-2 text-[clamp(1.05rem,2.8vw,1.45rem)] font-semibold text-slate-950 whitespace-nowrap">{formatRate(rate.buying_rate)}</p>
                   </div>
-                  <div className="rounded-2xl bg-sky-50 px-3 py-3">
+                  <div className="rounded-2xl bg-sky-50 px-4 py-4">
                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-skybrand-700">Sell</p>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">{formatRate(rate.selling_rate)}</p>
+                    <p className="mt-2 text-[clamp(1.05rem,2.8vw,1.45rem)] font-semibold text-slate-950 whitespace-nowrap">{formatRate(rate.selling_rate)}</p>
                   </div>
                 </div>
 
@@ -220,7 +234,9 @@ export default function LiveRatesPage() {
 
           {!rateCards.length && (
             <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
-              No exchange rates match your search.
+              {isEmptyResult
+                ? 'No exchange rates available for the selected branch.'
+                : 'No exchange rates match your search.'}
             </div>
           )}
         </section>

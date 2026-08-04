@@ -1,8 +1,0 @@
----
-deployment:
-  tasks:
-    - export NODE_VERSION=20
-    - cd burea
-    - npm ci
-    - npm run build
-    - cp -r dist/* ../public_html/

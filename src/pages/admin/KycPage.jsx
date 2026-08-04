@@ -6,11 +6,11 @@ export default function KycPage() {
   const queryClient = useQueryClient()
   const query = useQuery({
     queryKey: ['admin-kyc'],
-    queryFn: async () => (await http.get('/admin/kyc')).data.queue,
+    queryFn: async () => (await http.get('admin/kyc')).data.queue,
   })
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, status }) => http.patch(`/admin/kyc/${id}`, { status }),
+    mutationFn: async ({ id, status }) => http.patch(`admin/kyc/${id}`, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-kyc'] }),
   })
 
