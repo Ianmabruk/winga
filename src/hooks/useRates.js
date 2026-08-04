@@ -12,12 +12,19 @@ export const useRates = () => {
   const query = useQuery({
     queryKey: ['live-rates', branchName],
     queryFn: async () => {
-      logDebug('useRates-fetch', { branch: branchName, browser: typeof navigator !== 'undefined' ? navigator.userAgent : 'ssr' })
+      logDebug('useRates-fetch', {
+        branch: branchName,
+        url: `${import.meta.env.VITE_API_URL || ''}/api/rates/live?branch_name=${encodeURIComponent(branchName)}`,
+      })
       const rates = await loadRates(branchName)
-      logDebug('useRates-receive', { branch: branchName, count: rates?.length || 0 })
+      logDebug('useRates-receive', {
+        branch: branchName,
+        count: rates?.length || 0,
+        status: 'success',
+        lastUpdate: new Date().toISOString(),
+      })
       return rates
     },
-    // Live data: never serve stale cache. Always fetch fresh.
     staleTime: 0,
     gcTime: 30_000,
     retry: 2,
@@ -35,6 +42,39 @@ export const useRates = () => {
       setRatesData(query.data)
     }
   }, [query.data, setRatesData])
+
+  // Chrome bfcache (back-forward cache) fix: when Chrome restores a page from
+  // bfcache, React Query's refetchInterval timer is paused and the component
+  // does NOT remount. Without this listener, Chrome shows stale data from the
+  // last visit until the user manually refreshes. Firefox/Safari handle this
+  // more aggressively via refetchOnWindowFocus.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handlePageshow = (event) => {
+      if (event.persisted) {
+        logDebug('bfcache-restore', { branch: branchName })
+        query.refetch()
+      }
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        logDebug('tab-visible', { branch: branchName, isFetching: query.isFetching })
+        if (!query.isFetching) {
+          query.refetch()
+        }
+      }
+    }
+
+    window.addEventListener('pageshow', handlePageshow)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.removeEventListener('pageshow', handlePageshow)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [query, branchName])
 
   return query
 }
