@@ -27,6 +27,7 @@ export const useForexStore = create(
       previousRatesMap: {},
       changedCurrencies: [],
       lastUpdated: null,
+      staleData: false,
 
       rates: {},
 
@@ -42,25 +43,28 @@ setRatesData: (ratesData) => {
          const prevMap = get().ratesMap
          const newMap = toRatesMap(safeRatesData)
 
-         const changed = safeRatesData
-           .filter((r) => {
-             const prev = prevMap[r.currency_code]
-             if (!prev) return false
-             return (
-               prev.buying_rate !== r.buying_rate ||
-               prev.selling_rate !== r.selling_rate
-             )
-           })
-           .map((r) => r.currency_code)
+          const changed = safeRatesData
+            .filter((r) => {
+              const prev = prevMap[r.currency_code]
+              if (!prev) return false
+              return (
+                prev.buying_rate !== r.buying_rate ||
+                prev.selling_rate !== r.selling_rate
+              )
+            })
+            .map((r) => r.currency_code)
 
-         set({
-           ratesData: safeRatesData,
-           ratesMap: newMap,
-           previousRatesMap: prevMap,
-           changedCurrencies: changed,
-           lastUpdated: new Date().toISOString(),
-           rates: toLegacyRates(safeRatesData),
-         })
+          const staleFlag = safeRatesData.some((r) => r.stale === true)
+
+          set({
+            ratesData: safeRatesData,
+            ratesMap: newMap,
+            previousRatesMap: prevMap,
+            changedCurrencies: changed,
+            lastUpdated: new Date().toISOString(),
+            staleData: staleFlag,
+            rates: toLegacyRates(safeRatesData),
+          })
 
          if (changed.length > 0) {
            setTimeout(() => set({ changedCurrencies: [] }), 2500)

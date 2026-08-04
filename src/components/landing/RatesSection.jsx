@@ -12,12 +12,20 @@ export default function RatesSection() {
   useRates()
   const ratesData = useForexStore((s) => s.ratesData)
   const lastUpdated = useForexStore((s) => s.lastUpdated)
+  const staleData = useForexStore((s) => s.staleData)
 
   const data = ratesData.filter((r) => SHOW.includes(r.currency_code)).slice(0, 6)
 
   return (
     <section className="py-14 md:py-16 bg-white">
       <div className="mx-auto w-[min(1440px,96vw)] px-4">
+        {staleData && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <p className="font-semibold">Rates may be delayed</p>
+            <p className="mt-1">The Winga API last returned rates that are over 1 hour old. We are showing the most recent data available. Rates update automatically every 15 seconds.</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -27,8 +35,9 @@ export default function RatesSection() {
           </div>
           {lastUpdated && (
             <div className="flex items-center gap-2 rounded-xl bg-market-up/10 border border-market-up/20 px-3.5 py-2 text-xs font-semibold text-market-up">
-              <FiRefreshCw size={12} className="animate-spin" />
+              <FiRefreshCw size={12} className={staleData ? 'animate-bounce' : 'animate-spin'} />
               Updated {new Date(lastUpdated).toLocaleTimeString()}
+              {staleData && <span className="text-amber-700">(Winga data stale — check back soon)</span>}
             </div>
           )}
         </div>

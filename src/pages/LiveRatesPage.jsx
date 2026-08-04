@@ -41,6 +41,7 @@ export default function LiveRatesPage() {
   const { selectedBranch, ratesData, previousRatesMap, lastUpdated } = useForexStore()
   const [query, setQuery] = useState('')
   const hasData = ratesData.length > 0
+  const staleData = useForexStore((s) => s.staleData)
   const isEmptyResult = isFetched && !isFetching && !hasData && !isError
 
   const visibleRates = useMemo(() => {
@@ -81,6 +82,12 @@ export default function LiveRatesPage() {
         description="View live buy and sell exchange rates for USD, EUR, GBP, KES, UGX, RWF and more. Real-time forex rates updated every 15 seconds."
         path="/rates"
       />
+      {staleData && hasData && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold">Stale rate warning</p>
+          <p className="mt-1">The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.</p>
+        </div>
+      )}
       {isError && !hasData && (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <p className="font-semibold">Live rates are currently unavailable</p>

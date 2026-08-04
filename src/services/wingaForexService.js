@@ -12,6 +12,8 @@ import { API_URL } from '../lib/http'
 const PROXY_BASE = `${API_URL}/api/rates/live`
 const BRANCHES_BASE = `${API_URL}/api/rates/branches`
 
+const STALE_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour — rates should refresh every 15 seconds
+
 const CACHE_BUST = () => `t=${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
 
 const NO_CACHE_HEADERS = {
@@ -55,42 +57,109 @@ const fetchNoCache = async (url, { method = 'GET', headers = {} } = {}) => {
   return response
 }
 
+const parseEffectiveDate = (dateStr) => {
+  if (!dateStr) return null
+  try {
+    const safe = String(dateStr).trim()
+    const iso = safe.includes('T') ? safe : safe.replace(' ', 'T')
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return null
+    return d
+  } catch {
+    return null
+  }
+}
+
 const normalizeRateData = (data) => {
   const rates = []
-  const seen = new Set()
-
-  const pushReal = (entry) => {
-    if (!entry || !entry.currency_code) return
-    const code = String(entry.currency_code).toUpperCase()
-    if (code.length > 3 || seen.has(code)) return
-
-    const buy = Number(entry.buying_rate)
-    const sell = Number(entry.selling_rate)
-    if (!(buy > 0) || !(sell > 0)) return
-
-    seen.add(code)
-    rates.push({
-      branch_name: entry.branch_name || 'HEAD OFFICE',
-      currency_code: code,
-      currency_name: entry.currency_name || entry.currency_actual_name || code,
-      currency_actual_name: entry.currency_actual_name || code,
-      currency_sequence: Number(entry.currency_sequence) || rates.length + 1,
-      buying_rate: buy,
-      selling_rate: sell,
-      effective_date_and_time: entry.effective_date_and_time || new Date().toISOString().replace('T', ' ').replace(/\.\d+Z$/, ''),
-      source: entry.source || 'winga',
-    })
-  }
 
   if (!data || typeof data !== 'object') return []
 
-  if (Array.isArray(data.message)) {
-    data.message.forEach(pushReal)
-  } else if (Array.isArray(data)) {
-    data.forEach(pushReal)
+  // Collect raw entries from the Winga API response
+  const raw = Array.isArray(data.message) ? data.message
+    : (Array.isArray(data) ? data
+      : [])
+
+  // Group by currency_code — Winga may return multiple rows per currency
+  // (e.g. USD for different bill denominations). We must pick the canonical
+  // entry, not the first or last one.
+  const candidates = {}
+  for (const entry of raw) {
+    if (!entry || !entry.currency_code) continue
+    const code = String(entry.currency_code).toUpperCase()
+    if (code.length > 3) continue
+    const buy = Number(entry.buying_rate)
+    const sell = Number(entry.selling_rate)
+    if (!(buy > 0) || !(sell > 0)) continue
+    if (!candidates[code]) candidates[code] = []
+    candidates[code].push(entry)
   }
 
-  rates.sort((a, b) => (a.currency_sequence || 999) - (b.currency_sequence || 999))
+  for (const [code, entries] of Object.entries(candidates)) {
+    let chosen = entries[0]
+
+    if (entries.length > 1) {
+      // Preference 1: canonical entry where currency_name === currency_code
+      chosen = entries.find((e) =>
+        String(e.currency_name || '').toUpperCase() === code
+      )
+      // Preference 2: canonical actual_name starting with the code
+      if (!chosen) {
+        chosen = entries.find((e) =>
+          String(e.currency_actual_name || '').toUpperCase().startsWith(code)
+        )
+      }
+      // Preference 3: highest buying_rate (most likely the standard, not old-denomination rate)
+      if (!chosen) {
+        chosen = entries.reduce(
+          (best, e) => Number(e.buying_rate) > Number(best.buying_rate) ? e : best,
+          entries[0],
+        )
+      }
+      logDebug('duplicate-currency', {
+        code,
+        count: entries.length,
+        chosen: chosen.currency_name,
+        all: entries.map((e) => ({
+          name: e.currency_name,
+          buy: e.buying_rate,
+          sell: e.selling_rate,
+        })),
+      })
+    }
+
+    const buy = Number(chosen.buying_rate)
+    const sell = Number(chosen.selling_rate)
+    if (!(buy > 0) || !(sell > 0)) continue
+
+    const effDate = parseEffectiveDate(chosen.effective_date_and_time)
+    const isStale = effDate ? (Date.now() - effDate.getTime() > STALE_THRESHOLD_MS) : false
+
+    if (isStale) {
+      const ageMin = Math.round((Date.now() - effDate.getTime()) / 60_000)
+      console.warn(
+        `[wingaForexService] Stale rate for ${code}: effective_date_and_time=${chosen.effective_date_and_time} (${ageMin} minutes old)`,
+      )
+    }
+
+    rates.push({
+      branch_name: chosen.branch_name || 'HEAD OFFICE',
+      currency_code: code,
+      currency_name: chosen.currency_name || chosen.currency_actual_name || code,
+      currency_actual_name: chosen.currency_actual_name || code,
+      currency_sequence:
+        Number(chosen.currency_sequence) > 0
+          ? Number(chosen.currency_sequence)
+          : rates.length + 1,
+      buying_rate: buy,
+      selling_rate: sell,
+      effective_date_and_time: chosen.effective_date_and_time || '',
+      stale: isStale,
+      source: chosen.source || 'winga',
+    })
+  }
+
+  rates.sort((a, b) => a.currency_sequence - b.currency_sequence)
   return rates
 }
 
@@ -133,23 +202,29 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
   const data = await response.json()
   logDebug('rates-raw', { branch, body: data })
 
-  // Always read from response.data.message (Winga API contract)
   const normalized = normalizeRateData(data)
+  const staleCount = normalized.filter((r) => r.stale).length
+
   logDebug('rates-parsed', {
     branch,
     count: normalized.length,
+    staleCount,
     currencies: normalized.map((r) => ({
       code: r.currency_code,
       seq: r.currency_sequence,
       buy: r.buying_rate,
       sell: r.selling_rate,
       updated: r.effective_date_and_time,
+      stale: r.stale,
     })),
     lastUpdate: new Date().toISOString(),
   })
 
   if (normalized.length > 0) {
     console.log('[wingaForexService] Live Winga rates loaded:', normalized.length, 'currencies for branch:', branch)
+    if (staleCount > 0) {
+      console.warn('[wingaForexService] WARNING:', staleCount, 'rates are stale (effective_date > 1 hour old).', 'Winga API may be serving cached data from Frappe cache layer.')
+    }
   } else {
     console.warn('[wingaForexService] Winga API returned empty rates (message:[]) for branch:', branch)
   }

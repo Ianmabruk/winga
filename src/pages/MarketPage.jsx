@@ -70,6 +70,7 @@ export default function MarketPage() {
   const { isFetching, isError, isFetched } = useRates()
   const { ratesData, previousRatesMap, selectedBranch, lastUpdated } = useForexStore()
   const hasData = ratesData.length > 0
+  const staleData = useForexStore((s) => s.staleData)
   const isEmptyResult = isFetched && !isFetching && !hasData && !isError
 
   const marketData = useMemo(() => {
@@ -137,6 +138,12 @@ export default function MarketPage() {
         description="Monitor live forex market intelligence, currency momentum, buy and sell movement, and spread pressure for all currencies including USD, EUR, GBP, KES, UGX, RWF and 166+ more."
         path="/rates-dashboard"
       />
+      {staleData && hasData && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold">Stale rate warning</p>
+          <p className="mt-1">The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.</p>
+        </div>
+      )}
       {isError && !hasData && (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <p className="font-semibold">Live rates are currently unavailable</p>
