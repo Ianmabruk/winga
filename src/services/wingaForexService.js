@@ -77,8 +77,9 @@ const normalizeRateData = (data) => {
 
   // Collect raw entries from the Winga API response
   const raw = Array.isArray(data.message) ? data.message
-    : (Array.isArray(data) ? data
-      : [])
+    : (data.message && typeof data.message === 'object' && !Array.isArray(data.message))
+      ? Object.values(data.message)
+      : (Array.isArray(data) ? data : [])
 
   // Group by currency_code — Winga may return multiple rows per currency
   // (e.g. USD for different bill denominations). We must pick the canonical
