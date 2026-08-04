@@ -315,14 +315,16 @@ function DiagnosticsPage() {
     if (!testResults?.ratesResult?.ok) return []
     const data = testResults.ratesResult.data
     if (!data?.data?.message) return []
-    return data.data.message
+    const msg = data.data.message
+    return Array.isArray(msg) ? msg : msg && typeof msg === 'object' ? Object.values(msg) : []
   }
 
   const extractBranches = (testResults) => {
     if (!testResults?.branchesResult?.ok) return []
     const data = testResults.branchesResult.data
     if (!data?.data?.message) return []
-    return data.data.message
+    const msg = data.data.message
+    return Array.isArray(msg) ? msg : msg && typeof msg === 'object' ? Object.values(msg) : []
   }
 
   const computeValidationIssues = (rates) => {
