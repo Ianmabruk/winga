@@ -21,6 +21,7 @@ const UsersPage = lazy(() => import('./pages/admin/UsersPage'))
 const KycPage = lazy(() => import('./pages/admin/KycPage'))
 const BranchesPage = lazy(() => import('./pages/admin/BranchesPage'))
 const RatesPage = lazy(() => import('./pages/admin/RatesPage'))
+const DiagnosticsPage = lazy(() => import('./pages/admin/DiagnosticsPage'))
 const AuditLogsPage = lazy(() => import('./pages/admin/AuditLogsPage'))
 
 import WingaForexLogo from './components/WingaForexLogo'
@@ -63,6 +64,7 @@ function App() {
               <Route path="kyc" element={<KycPage />} />
               <Route path="branches" element={<BranchesPage />} />
               <Route path="rates" element={<RatesPage />} />
+              <Route path="diagnostics" element={<DiagnosticsPage />} />
               <Route path="audit" element={<AuditLogsPage />} />
             </Route>
           </Route>

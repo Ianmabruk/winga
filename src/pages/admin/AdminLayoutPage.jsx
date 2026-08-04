@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi'
-import { FiActivity, FiFileText, FiMapPin, FiShield, FiUsers } from 'react-icons/fi'
+import { FiActivity, FiFileText, FiMapPin, FiShield, FiTool, FiUsers } from 'react-icons/fi'
 
 const items = [
   { to: '/admin/overview', label: 'Overview', icon: FiActivity },
@@ -9,6 +9,7 @@ const items = [
   { to: '/admin/kyc', label: 'KYC Queue', icon: FiShield },
   { to: '/admin/branches', label: 'Branches', icon: FiMapPin },
   { to: '/admin/rates', label: 'Rate Control', icon: FiActivity },
+  { to: '/admin/diagnostics', label: 'API Diagnostics', icon: FiTool },
   { to: '/admin/audit', label: 'Audit Logs', icon: FiFileText },
 ]
 
