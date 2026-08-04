@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { http } from '../../lib/http'
 
 const WINGA_RATES_ENDPOINT =
@@ -59,6 +59,181 @@ const ageString = (effDateStr) => {
   if (hours > 0) return `${hours}h ${minutes}m`
   return `${minutes}m`
 }
+
+function CalculatorTest({ rates }) {
+  const [amount, setAmount] = useState('1000')
+  const [fromCode, setFromCode] = useState('USD')
+  const [toCode, setToCode] = useState('TZS')
+  const [mode, setMode] = useState('sell')
+  const [backendResult, setBackendResult] = useState(null)
+  const [backendLoading, setBackendLoading] = useState(false)
+  const [backendError, setBackendError] = useState(null)
+
+  const codes = rates.map((r) => r.currency_code)
+  const fromRate = rates.find((r) => r.currency_code === fromCode)
+  const toRate = rates.find((r) => r.currency_code === toCode)
+
+  const frontendResult = useMemo(() => {
+    const n = Number(amount) || 0
+    if (n <= 0 || !fromRate || !toRate) return null
+
+    const fromSide = mode === 'sell' ? 'buying_rate' : 'selling_rate'
+    const toSide = mode === 'buy' ? 'selling_rate' : 'buying_rate'
+
+    if (fromCode === 'TZS') {
+      return {
+        amount: n,
+        result: n / Number(toRate[toSide]),
+        effectiveRate: Number(toRate[toSide]),
+        via: 'TZS → ' + toCode,
+      }
+    }
+    if (toCode === 'TZS') {
+      return {
+        amount: n,
+        result: n * Number(fromRate[fromSide]),
+        effectiveRate: Number(fromRate[fromSide]),
+        via: fromCode + ' → TZS',
+      }
+    }
+    const tzsAmount = n * Number(fromRate[fromSide])
+    const finalAmount = tzsAmount / Number(toRate[toSide])
+    return {
+      amount: n,
+      result: finalAmount,
+      effectiveRate: Number(fromRate[fromSide]),
+      via: fromCode + ' → TZS → ' + toCode,
+    }
+  }, [amount, fromCode, toCode, fromRate, toRate, mode])
+
+  const runBackendCalc = async () => {
+    setBackendLoading(true)
+    setBackendError(null)
+    setBackendResult(null)
+    try {
+      const res = await http.post('rates/calculate', {
+        amount: Number(amount),
+        from: fromCode,
+        to: toCode,
+        side: mode,
+      })
+      setBackendResult(res.data)
+    } catch (err) {
+      setBackendError(err.response?.data?.message || err.message)
+    } finally {
+      setBackendLoading(false)
+    }
+  }
+
+  const backendGross = backendResult?.result?.grossConverted
+
+  return (
+    <div className="rounded-xl border border-slate-200 p-4">
+      <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
+        <div className="grid gap-3">
+          <div>
+            <label className="text-xs font-medium text-slate-600">Amount</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-slate-600">From</label>
+              <select
+                value={fromCode}
+                onChange={(e) => setFromCode(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+              >
+                {codes.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600">To</label>
+              <select
+                value={toCode}
+                onChange={(e) => setToCode(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+              >
+                {codes.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">Mode</label>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="sell">Sell (to bureau)</option>
+              <option value="buy">Buy (from bureau)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid auto-rows-min gap-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-medium text-slate-600">Frontend Result (no fees)</p>
+            {frontendResult ? (
+              <div className="font-mono text-lg font-bold">
+                {frontendResult.result.toFixed(2)} {toCode}
+                <span className="block text-xs font-normal text-slate-500">
+                  Rate: 1 {fromCode} = {frontendResult.effectiveRate} TZS
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm text-slate-500">Enter amount and select currencies</span>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-sky-200 bg-sky-50 p-3">
+            <p className="text-xs font-medium text-sky-700">Backend Result (with fees)</p>
+            {backendLoading ? (
+              <span className="text-sm text-slate-500">Calculating...</span>
+            ) : backendError ? (
+              <span className="text-sm text-rose-600">{backendError}</span>
+            ) : backendResult ? (
+              <div className="font-mono">
+                <div className="text-lg font-bold text-sky-900">{backendResult.result?.net || '—'} {toCode} (net)</div>
+                <div className="text-xs text-slate-600">
+                  Gross: {backendResult.result?.grossConverted || '—'} |
+                  Spread: {backendResult.result?.spread || '—'} |
+                  Fee: {backendResult.result?.transferFee || '—'} |
+                  Commission: {backendResult.result?.commission || '—'}
+                </div>
+                {frontendResult && backendGross && (
+                  <div className="mt-1 text-xs">
+                    <span className={Math.abs(frontendResult.result - Number(backendGross)) < 0.01 ? 'text-emerald-600' : 'text-rose-600'}>
+                      Frontend gross matches backend gross: {Math.abs(frontendResult.result - Number(backendGross)) < 0.01 ? 'YES' : 'NO'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={runBackendCalc}
+                disabled={!frontendResult}
+                className="rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Run Backend Calculate
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+CalculatorTest
 
 function DiagnosticsPage() {
   const [selectedBranch, setSelectedBranch] = useState(DEFAULT_BRANCH)
@@ -492,23 +667,24 @@ function DiagnosticsPage() {
       {/* Tabs */}
       {testResults && (
         <div className="flex gap-2 border-b border-slate-200">
-          {['test', 'currencies', 'validation', 'comparison', 'logs'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveSection(tab)}
-              className={`px-4 py-2 text-sm font-semibold ${
-                activeSection === tab
-                  ? 'border-b-2 border-skybrand-500 text-skybrand-700'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {tab === 'test' && 'API Test Details'}
-              {tab === 'currencies' && 'Currency Table'}
-              {tab === 'validation' && 'Validation Issues'}
-              {tab === 'comparison' && 'Rate Comparison'}
-              {tab === 'logs' && 'Debug Log'}
-            </button>
-          ))}
+            {['test', 'currencies', 'validation', 'comparison', 'calculator', 'logs'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveSection(tab)}
+                className={`px-4 py-2 text-sm font-semibold ${
+                  activeSection === tab
+                    ? 'border-b-2 border-skybrand-500 text-skybrand-700'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab === 'test' && 'API Test Details'}
+                {tab === 'currencies' && 'Currency Table'}
+                {tab === 'validation' && 'Validation Issues'}
+                {tab === 'comparison' && 'Rate Comparison'}
+                {tab === 'calculator' && 'Calculator Test'}
+                {tab === 'logs' && 'Debug Log'}
+              </button>
+            ))}
         </div>
       )}
 
@@ -849,6 +1025,48 @@ function DiagnosticsPage() {
                 Root cause is likely: stale Winga Frappe cache, failed rate sync job, or
                 incorrect rate values in the Winga database.
               </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {testResults && activeSection === 'calculator' && (
+        <div className="grid gap-6">
+          <h3 className="font-bold text-slate-800">Calculator Comparison: Frontend vs Backend</h3>
+          <p className="text-sm text-slate-600">
+            Enter an amount and currency pair to compare the frontend's calculation
+            (client-side, no fees) with the backend's calculation (via /api/rates/calculate, includes fees).
+          </p>
+
+          <CalculatorTest rates={rates} />
+
+          {rates.length > 0 && (
+            <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+              <h4 className="font-bold text-amber-800">Rate Direction Semantics</h4>
+              <div className="mt-2 grid gap-3 text-sm">
+                <div>
+                  <span className="font-medium text-amber-800">Frontend (ForexCalculatorPanel):</span>
+                  <ul className="mt-1 list-inside list-disc text-amber-700">
+                    <li>Mode "sell" (user sells FROM to bureau) → uses <code>buying_rate</code> (what bureau pays)</li>
+                    <li>Mode "buy" (user buys FROM from bureau) → uses <code>selling_rate</code> (what bureau charges)</li>
+                    <li>No fees applied — simple rate conversion only</li>
+                  </ul>
+                </div>
+                <div>
+                  <span className="font-medium text-amber-800">Backend (/api/rates/calculate):</span>
+                  <ul className="mt-1 list-inside list-disc text-amber-700">
+                    <li>side="sell" → uses <code>buying_rate</code> (FIXED — was inverted before)</li>
+                    <li>side="buy" → uses <code>selling_rate</code></li>
+                    <li>Applies fees: spread (0.5%), transfer fee (0.4%), commission (0.15%)</li>
+                  </ul>
+                </div>
+                <div className="border-t border-amber-200 pt-2 text-amber-800">
+                  <span className="font-medium">Note:</span> The frontend calculator does not call the backend endpoint —
+                  it calculates locally. The frontend's gross amount should match the backend's
+                  gross (before fees). The "You Receive" amount on the frontend includes no fees,
+                  while the backend's "net" amount deducts spread + fees + commission.
+                </div>
+              </div>
             </div>
           )}
         </div>
