@@ -33,7 +33,7 @@ export const useForexStore = create(
 
       rates: {},
 
-    setRatesData: (ratesData, stale = false, staleReason = null, providerTimestamp = null) => {
+    setRatesData: (ratesData, stale = false, staleReason = null, providerTimestamp = null, staleTimestamp = false) => {
           const safeRatesData = Array.isArray(ratesData) ? ratesData : []
           if (!safeRatesData.length) {
             const existing = get().ratesData
@@ -56,7 +56,8 @@ export const useForexStore = create(
             })
             .map((r) => r.currency_code)
 
-          const staleFlag = stale === true || safeRatesData.some((r) => r.stale === true)
+          const staleFlag = stale === true
+          const showStaleBanner = staleFlag || staleTimestamp
 
           set({
             ratesData: safeRatesData,
@@ -64,8 +65,8 @@ export const useForexStore = create(
             previousRatesMap: prevMap,
             changedCurrencies: changed,
             lastUpdated: new Date().toISOString(),
-            staleData: staleFlag,
-            staleReason: staleFlag ? (staleReason || 'Provider data is outdated. Showing latest verified database rates.') : null,
+            staleData: showStaleBanner,
+            staleReason: showStaleBanner ? (staleReason || 'Provider timestamp is outdated. Rates are current.') : null,
             providerTimestamp: providerTimestamp || null,
             rates: toLegacyRates(safeRatesData),
           })

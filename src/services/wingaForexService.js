@@ -205,16 +205,16 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
   logDebug('rates-raw', { branch, body: data })
 
   const normalized = normalizeRateData(data)
-  const staleCount = normalized.filter((r) => r.stale === true).length
 
   const isProviderStale = data.stale === true
+  const staleTimestamp = data.staleTimestamp === true
   const staleReason = data.staleReason || data.reason || null
 
   logDebug('rates-parsed', {
     branch,
     count: normalized.length,
-    staleCount,
     isProviderStale,
+    staleTimestamp,
     staleReason,
     currencies: normalized.map((r) => ({
       code: r.currency_code,
@@ -229,9 +229,10 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
 
   if (normalized.length > 0) {
     console.log('[wingaForexService] Live Winga rates loaded:', normalized.length, 'currencies for branch:', branch)
-    if (isProviderStale) {
+    if (staleTimestamp) {
       console.warn(
-        '[wingaForexService] WARNING: Provider data is outdated. Showing latest verified database rates. ' +
+        '[wingaForexService] WARNING: Provider timestamp is outdated. ' +
+          'Rates are current but the effective_date_and_time field is stale. ' +
           `Reason: ${staleReason}`,
       )
     }
@@ -239,7 +240,7 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
     console.warn('[wingaForexService] Winga API returned empty rates (message:[]) for branch:', branch)
   }
 
-  return { rates: normalized, stale: isProviderStale, staleReason, providerTimestamp: data.providerTimestamp }
+  return { rates: normalized, stale: isProviderStale, staleTimestamp, staleReason, providerTimestamp: data.providerTimestamp }
 }
 
 export { loadBranches, loadRates, normalizeRateData }

@@ -23,10 +23,11 @@ export const useRates = () => {
         count: rates?.length || 0,
         status: 'success',
         isProviderStale: result?.stale || false,
+        staleTimestamp: result?.staleTimestamp || false,
         staleReason: result?.staleReason || null,
         lastUpdate: new Date().toISOString(),
       })
-      return { rates, stale: result?.stale || false, staleReason: result?.staleReason || null, providerTimestamp: result?.providerTimestamp || null }
+      return { rates, stale: result?.stale || false, staleTimestamp: result?.staleTimestamp || false, staleReason: result?.staleReason || null, providerTimestamp: result?.providerTimestamp || null }
     },
     staleTime: 0,
     gcTime: 30_000,
@@ -42,7 +43,7 @@ export const useRates = () => {
 
   useEffect(() => {
     if (query.data?.rates && Array.isArray(query.data.rates)) {
-      setRatesData(query.data.rates, query.data.stale || false, query.data.staleReason || null)
+      setRatesData(query.data.rates, query.data.stale || false, query.data.staleReason || null, query.data.providerTimestamp || null, query.data.staleTimestamp || false)
     }
   }, [query.data, setRatesData])
 
