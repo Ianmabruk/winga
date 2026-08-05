@@ -16,14 +16,17 @@ export const useRates = () => {
         branch: branchName,
         url: `${import.meta.env.VITE_API_URL || ''}/api/rates/live?branch_name=${encodeURIComponent(branchName)}`,
       })
-      const rates = await loadRates(branchName)
+      const result = await loadRates(branchName)
+      const rates = result?.rates || []
       logDebug('useRates-receive', {
         branch: branchName,
         count: rates?.length || 0,
         status: 'success',
+        isProviderStale: result?.stale || false,
+        staleReason: result?.staleReason || null,
         lastUpdate: new Date().toISOString(),
       })
-      return rates
+      return { rates, stale: result?.stale || false, staleReason: result?.staleReason || null, providerTimestamp: result?.providerTimestamp || null }
     },
     staleTime: 0,
     gcTime: 30_000,
@@ -38,8 +41,8 @@ export const useRates = () => {
   })
 
   useEffect(() => {
-    if (query.data && Array.isArray(query.data)) {
-      setRatesData(query.data)
+    if (query.data?.rates && Array.isArray(query.data.rates)) {
+      setRatesData(query.data.rates, query.data.stale || false, query.data.staleReason || null)
     }
   }, [query.data, setRatesData])
 

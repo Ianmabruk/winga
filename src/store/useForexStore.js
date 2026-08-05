@@ -28,22 +28,24 @@ export const useForexStore = create(
       changedCurrencies: [],
       lastUpdated: null,
       staleData: false,
+      staleReason: null,
+      providerTimestamp: null,
 
       rates: {},
 
-setRatesData: (ratesData) => {
-         const safeRatesData = Array.isArray(ratesData) ? ratesData : []
-         if (!safeRatesData.length) {
-           const existing = get().ratesData
-           if (existing && existing.length > 0) {
-             set({ lastUpdated: get().lastUpdated })
-           }
-           return
-         }
-         const prevMap = get().ratesMap
-         const newMap = toRatesMap(safeRatesData)
+    setRatesData: (ratesData, stale = false, staleReason = null, providerTimestamp = null) => {
+          const safeRatesData = Array.isArray(ratesData) ? ratesData : []
+          if (!safeRatesData.length) {
+            const existing = get().ratesData
+            if (existing && existing.length > 0) {
+              set({ lastUpdated: get().lastUpdated })
+            }
+            return
+          }
+          const prevMap = get().ratesMap
+          const newMap = toRatesMap(safeRatesData)
 
-          const changed = safeRatesData
+           const changed = safeRatesData
             .filter((r) => {
               const prev = prevMap[r.currency_code]
               if (!prev) return false
@@ -54,7 +56,7 @@ setRatesData: (ratesData) => {
             })
             .map((r) => r.currency_code)
 
-          const staleFlag = safeRatesData.some((r) => r.stale === true)
+          const staleFlag = stale === true || safeRatesData.some((r) => r.stale === true)
 
           set({
             ratesData: safeRatesData,
@@ -63,13 +65,15 @@ setRatesData: (ratesData) => {
             changedCurrencies: changed,
             lastUpdated: new Date().toISOString(),
             staleData: staleFlag,
+            staleReason: staleFlag ? (staleReason || 'Provider data is outdated. Showing latest verified database rates.') : null,
+            providerTimestamp: providerTimestamp || null,
             rates: toLegacyRates(safeRatesData),
           })
 
-         if (changed.length > 0) {
-           setTimeout(() => set({ changedCurrencies: [] }), 2500)
-         }
-       },
+          if (changed.length > 0) {
+            setTimeout(() => set({ changedCurrencies: [] }), 2500)
+          }
+        },
 
       setRates: (rates) => set({ rates }),
 

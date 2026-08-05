@@ -32,6 +32,7 @@ export default function ForexBoard() {
     selectedBranch,
     favorites,
     setSearchQuery,
+    staleData,
   } = useForexStore()
   const [group, setGroup] = useState('all')
   const deferredSearch = useDeferredValue(searchQuery)
@@ -143,21 +144,32 @@ export default function ForexBoard() {
             <span>Loading rates…</span>
           )}
         </div>
-        <div className={`flex items-center gap-1 font-medium ${isError ? 'text-red-500' : 'text-green-600'}`}>
-          {isError ? <FiWifiOff size={12} /> : <FiWifi size={12} />}
-          {isError ? 'Reconnecting…' : isFetching ? 'Refreshing…' : 'Live'}
+        <div className={`flex items-center gap-1 font-medium ${isError ? 'text-red-500' : staleData ? 'text-amber-600' : 'text-green-600'}`}>
+          {isError ? <FiWifiOff size={12} /> : isFetching ? <FiRefreshCw size={12} className="animate-spin" /> : <FiWifi size={12} />}
+          {isError ? 'Reconnecting…' : isFetching ? 'Refreshing…' : staleData ? 'Stale — showing verified rates' : 'Live'}
         </div>
       </div>
 
-      {isError && hasData && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-        >
-          Connection interrupted. Showing last successful rates. Retrying automatically…
-        </motion.div>
-      )}
+        {isError && hasData && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            Connection interrupted. Showing last successful rates. Retrying automatically…
+          </motion.div>
+        )}
+
+        {staleData && hasData && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            <p className="font-semibold">Live provider data is currently outdated. Showing the latest verified exchange rates.</p>
+            <p className="mt-1">The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.</p>
+          </motion.div>
+        )}
 
       {isError && !hasData && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">

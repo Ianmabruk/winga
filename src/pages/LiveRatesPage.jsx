@@ -38,7 +38,7 @@ function RatesSummaryCard({ label, value, detail }) {
 export default function LiveRatesPage() {
   useBranches()
   const { isFetching, isError, isFetched } = useRates()
-  const { selectedBranch, ratesData, previousRatesMap, lastUpdated } = useForexStore()
+  const { selectedBranch, ratesData, previousRatesMap, lastUpdated, staleReason } = useForexStore()
   const [query, setQuery] = useState('')
   const hasData = ratesData.length > 0
   const staleData = useForexStore((s) => s.staleData)
@@ -84,8 +84,8 @@ export default function LiveRatesPage() {
       />
       {staleData && hasData && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <p className="font-semibold">Stale rate warning</p>
-          <p className="mt-1">The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.</p>
+          <p className="font-semibold">Live provider data is currently outdated. Showing the latest verified exchange rates.</p>
+          <p className="mt-1">{staleReason || 'The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.'}</p>
         </div>
       )}
       {isError && !hasData && (

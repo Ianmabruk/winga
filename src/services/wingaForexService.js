@@ -133,10 +133,10 @@ const normalizeRateData = (data) => {
     const sell = Number(chosen.selling_rate)
     if (!(buy > 0) || !(sell > 0)) continue
 
-    const effDate = parseEffectiveDate(chosen.effective_date_and_time)
-    const isStale = effDate ? (Date.now() - effDate.getTime() > STALE_THRESHOLD_MS) : false
+     const effDate = parseEffectiveDate(chosen.effective_date_and_time)
+    const isRateStale = effDate ? (Date.now() - effDate.getTime() > STALE_THRESHOLD_MS) : false
 
-    if (isStale) {
+    if (isRateStale) {
       const ageMin = Math.round((Date.now() - effDate.getTime()) / 60_000)
       console.warn(
         `[wingaForexService] Stale rate for ${code}: effective_date_and_time=${chosen.effective_date_and_time} (${ageMin} minutes old)`,
@@ -155,8 +155,9 @@ const normalizeRateData = (data) => {
       buying_rate: buy,
       selling_rate: sell,
       effective_date_and_time: chosen.effective_date_and_time || '',
-      stale: isStale,
+      stale: isRateStale,
       source: chosen.source || 'winga',
+      providerStale: data.stale === true,
     })
   }
 
@@ -204,12 +205,17 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
   logDebug('rates-raw', { branch, body: data })
 
   const normalized = normalizeRateData(data)
-  const staleCount = normalized.filter((r) => r.stale).length
+  const staleCount = normalized.filter((r) => r.stale === true).length
+
+  const isProviderStale = data.stale === true
+  const staleReason = data.staleReason || data.reason || null
 
   logDebug('rates-parsed', {
     branch,
     count: normalized.length,
     staleCount,
+    isProviderStale,
+    staleReason,
     currencies: normalized.map((r) => ({
       code: r.currency_code,
       seq: r.currency_sequence,
@@ -223,14 +229,17 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
 
   if (normalized.length > 0) {
     console.log('[wingaForexService] Live Winga rates loaded:', normalized.length, 'currencies for branch:', branch)
-    if (staleCount > 0) {
-      console.warn('[wingaForexService] WARNING:', staleCount, 'rates are stale (effective_date > 1 hour old).', 'Winga API may be serving cached data from Frappe cache layer.')
+    if (isProviderStale) {
+      console.warn(
+        '[wingaForexService] WARNING: Provider data is outdated. Showing latest verified database rates. ' +
+          `Reason: ${staleReason}`,
+      )
     }
   } else {
     console.warn('[wingaForexService] Winga API returned empty rates (message:[]) for branch:', branch)
   }
 
-  return normalized
+  return { rates: normalized, stale: isProviderStale, staleReason, providerTimestamp: data.providerTimestamp }
 }
 
 export { loadBranches, loadRates, normalizeRateData }

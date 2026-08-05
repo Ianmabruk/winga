@@ -8,6 +8,18 @@ RewriteBase /
   Header set Expires "0"
 </FilesMatch>
 
+# Prevent caching of API responses by URL path
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/api/" API_REQUEST=1
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate" env=API_REQUEST
+    Header set Pragma "no-cache" env=API_REQUEST
+    Header set Expires "0" env=API_REQUEST
+    Header set Surrogate-Control "no-store" env=API_REQUEST
+</IfModule>
+
 RewriteRule ^index\.html$ - [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f

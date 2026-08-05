@@ -14,6 +14,6 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   if (!config.params) config.params = {}
-  config.params._t = Date.now()
+  config.params.t = Date.now()
   return config
 })
