@@ -1,13 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom'
 import { FiUser, FiLogOut } from 'react-icons/fi'
 import WingaForexLogo from '../components/WingaForexLogo'
 import LiveTicker from '../components/LiveTicker'
-import Footer from '../components/Footer'
-import FloatingWhatsApp from '../components/FloatingWhatsApp'
-import MobileBottomNav from '../components/MobileBottomNav'
 import { useAuthStore } from '../store/useAuthStore'
-import { useBranches } from '../hooks/useBranches'
+
+const Footer = lazy(() => import('../components/Footer'))
+const FloatingWhatsApp = lazy(() => import('../components/FloatingWhatsApp'))
+const MobileBottomNav = lazy(() => import('../components/MobileBottomNav'))
+const DeferredBranches = lazy(() => import('../components/DeferredBranches'))
+
+const DeferredFooter = () => (
+  <Suspense fallback={null}>
+    <Footer />
+  </Suspense>
+)
+
+const DeferredFloatingWhatsApp = () => (
+  <Suspense fallback={null}>
+    <FloatingWhatsApp />
+  </Suspense>
+)
+
+const DeferredMobileBottomNav = () => (
+  <Suspense fallback={null}>
+    <MobileBottomNav />
+  </Suspense>
+)
+
+const DeferredBranchesLoader = () => (
+  <Suspense fallback={null}>
+    <DeferredBranches />
+  </Suspense>
+)
 
 const navLinks = [
   { to: '/', label: 'Home', end: true },
@@ -20,7 +45,6 @@ const navLinks = [
 ]
 
 export default function AppShell() {
-  useBranches()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
@@ -84,13 +108,16 @@ export default function AppShell() {
       <main className="w-full pb-24 lg:pb-0"><Outlet /></main>
 
       {/* Footer */}
-      <Footer />
+      <DeferredFooter />
 
       {/* Floating WhatsApp */}
-      <FloatingWhatsApp />
+      <DeferredFloatingWhatsApp />
 
       {/* Mobile bottom navigation */}
-      <MobileBottomNav />
+      <DeferredMobileBottomNav />
+
+      {/* Branches loader (deferred) */}
+      <DeferredBranchesLoader />
     </div>
   )
 }

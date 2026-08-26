@@ -1,10 +1,13 @@
 import { useMemo } from 'react'
 import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
 import { useForexStore } from '../store/useForexStore'
+import { useRates } from '../hooks/useRates'
 import { getFlagUrl, getCurrencyBadge } from '../data/flags'
 import { formatRate } from '../utils/formatters'
 
 export default function LiveTicker() {
+  useRates()
+
   const ratesData = useForexStore((state) => state.ratesData)
   const previousRatesMap = useForexStore((state) => state.previousRatesMap)
 
@@ -18,7 +21,23 @@ export default function LiveTicker() {
     })
   }, [ratesData, previousRatesMap])
 
-  if (!items.length) return null
+  if (!items.length) {
+    return (
+      <div className="w-full overflow-hidden rounded-2xl border border-cyanice bg-white/90">
+        <div className="ticker-track flex min-w-max items-center gap-2 px-3 py-2 text-xs">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div
+              key={`skeleton-${idx}`}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-2.5 py-1.5 font-semibold text-navysoft whitespace-nowrap"
+            >
+              <div className="h-3.5 w-5 rounded-sm bg-slate-200 animate-pulse" />
+              <span> — /TZS</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   // Duplicate for seamless loop
   const doubled = [...items, ...items]

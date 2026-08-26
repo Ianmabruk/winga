@@ -2,8 +2,9 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './layouts/AppShell'
 import ProtectedRoute from './routes/ProtectedRoute'
+import HomePage from './pages/HomePage'
+import WingaForexLogo from './components/WingaForexLogo'
 
-const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage'))
@@ -23,8 +24,6 @@ const BranchesPage = lazy(() => import('./pages/admin/BranchesPage'))
 const RatesPage = lazy(() => import('./pages/admin/RatesPage'))
 const DiagnosticsPage = lazy(() => import('./pages/admin/DiagnosticsPage'))
 const AuditLogsPage = lazy(() => import('./pages/admin/AuditLogsPage'))
-
-import WingaForexLogo from './components/WingaForexLogo'
 
 const RouteLoader = () => (
   <div className="glass-surface grid place-items-center rounded-3xl p-10 text-center">

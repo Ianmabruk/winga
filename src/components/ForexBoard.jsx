@@ -96,21 +96,19 @@ export default function ForexBoard() {
               isFetching ? 'cursor-wait opacity-60' : ''
             }`}
           >
-            <FiRefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
+            <FiRefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
       {isError && !hasData && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <p className="font-semibold">Live rates are currently unavailable</p>
-          <p className="mt-1">Unable to connect to the Winga live rate feed. Please check your connection and try again later.</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-800">
+          Rates unavailable
         </div>
       )}
       {isError && hasData && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <p className="font-semibold">Connection interrupted — showing last successful rates</p>
-          <p className="mt-1">Retrying automatically to restore live Winga pricing.</p>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+          Stale data
         </div>
       )}
 
@@ -145,8 +143,8 @@ export default function ForexBoard() {
           )}
         </div>
         <div className={`flex items-center gap-1 font-medium ${isError ? 'text-red-500' : staleData ? 'text-amber-600' : 'text-green-600'}`}>
-          {isError ? <FiWifiOff size={12} /> : isFetching ? <FiRefreshCw size={12} className="animate-spin" /> : <FiWifi size={12} />}
-          {isError ? 'Reconnecting…' : isFetching ? 'Refreshing…' : staleData ? 'Stale — showing verified rates' : 'Live'}
+          {isError ? <FiWifiOff size={12} /> : isLoading ? <FiRefreshCw size={12} className="animate-spin" /> : staleData ? <FiClock size={12} /> : <FiWifi size={12} />}
+          {isError ? 'Reconnecting…' : isFetching ? 'Refreshing…' : staleData ? 'Stale' : 'Live'}
         </div>
       </div>
 
@@ -154,9 +152,9 @@ export default function ForexBoard() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-800"
           >
-            Connection interrupted. Showing last successful rates. Retrying automatically…
+            Stale data
           </motion.div>
         )}
 
@@ -164,22 +162,20 @@ export default function ForexBoard() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-800"
           >
-            <p className="font-semibold">Live provider data is currently outdated. Showing the latest verified exchange rates.</p>
-            <p className="mt-1">The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.</p>
+            Rates are stale — last updated from provider may be delayed
           </motion.div>
         )}
 
       {isError && !hasData && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
-          <p className="font-semibold text-amber-800">Unable to load exchange rates</p>
-          <p className="mt-1 text-sm text-amber-700">Check your internet connection and try again.</p>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
+          No exchange rates available
           <button
             onClick={() => refetch()}
             className="mt-3 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition"
           >
-            Retry Now
+            Retry
           </button>
         </div>
       )}

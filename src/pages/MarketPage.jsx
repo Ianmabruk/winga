@@ -1,417 +1,421 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  FiActivity,
-  FiArrowDownRight,
-  FiArrowUpRight,
-  FiBarChart2,
-  FiClock,
-  FiRefreshCw,
-  FiTrendingDown,
-  FiTrendingUp,
-  FiZap,
-} from 'react-icons/fi'
+import { FiActivity, FiRefreshCw, FiSearch, FiX, FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi'
 import BranchSelector from '../components/BranchSelector'
-import SparklineChart from '../components/SparklineChart'
-import { getFlagUrl, getCurrencyBadge } from '../data/flags'
-import { useBranches } from '../hooks/useBranches'
+import MarketSummaryCard, { MarketStatusIndicator } from '../components/MarketSummaryCard'
+import MarketRateCard from '../components/MarketRateCard'
+import BuySellTabs from '../components/BuySellTabs'
+import { CurrencyCardSkeleton } from '../components/LoadingSkeleton'
+import Flag from '../components/Flag'
+import WingaForexLogo from '../components/WingaForexLogo'
 import { useRates } from '../hooks/useRates'
 import { useForexStore } from '../store/useForexStore'
-import { movementFromRates } from '../utils/forexMath'
 import { formatRate, formatTime, spreadPercent } from '../utils/formatters'
 import Seo from '../components/Seo'
-
-const marketThemes = [
-  'from-emerald-400/18 via-white to-sky-400/10',
-  'from-skybrand-400/18 via-white to-cyan-400/10',
-  'from-amber-300/18 via-white to-rose-300/10',
-  'from-cyan-300/18 via-white to-emerald-300/10',
-]
 
 const revealGroup = {
   hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { staggerChildren: 0.08, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.04, delayChildren: 0.02 },
   },
 }
 
-const revealCard = {
-  hidden: { opacity: 0, y: 22 },
+const revealItem = {
+  hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.34, ease: 'easeOut' } },
 }
 
-function formatDelta(value) {
-  const sign = value > 0 ? '+' : ''
-  return `${sign}${value.toFixed(2)}%`
-}
-
-function MetricCard({ label, value, tone, detail, Icon }) {
-  return (
-    <article className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/72 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-      <div className={`absolute inset-x-0 top-0 h-1.5 ${tone}`} />
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>
-          <p className="mt-3 font-display text-[clamp(1.45rem,3vw,2rem)] text-slate-950">{value}</p>
-          <p className="mt-2 text-sm text-slate-600">{detail}</p>
-        </div>
-        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/10">
-          <Icon size={18} />
-        </span>
-      </div>
-    </article>
-  )
-}
-
 export default function MarketPage() {
-  useBranches()
-  const { isFetching, isError, isFetched } = useRates()
-  const { ratesData, previousRatesMap, selectedBranch, lastUpdated, staleReason } = useForexStore()
+  console.log('[MarketPage][component-render]')
+  const [search, setSearch] = useState('')
+
+  const { isFetching, isError } = useRates({ cacheFirst: true })
+  const {
+    ratesData,
+    previousRatesMap,
+    lastUpdated,
+    staleData,
+    rateView,
+    setRateView,
+    selectedBranch,
+  } = useForexStore()
+
   const hasData = ratesData.length > 0
-  const staleData = useForexStore((s) => s.staleData)
-  const isEmptyResult = isFetched && !isFetching && !hasData && !isError
+
+  const filteredRates = useMemo(() => {
+    if (!search.trim()) return ratesData
+
+    const q = search.trim().toLowerCase()
+    return ratesData.filter((rate) => {
+      const code = (rate.currency_code || '').toLowerCase()
+      const name = (rate.currency_actual_name || '').toLowerCase()
+      return code.includes(q) || name.includes(q)
+    })
+  }, [ratesData, search])
 
   const marketData = useMemo(() => {
-    return ratesData
-      .map((rate) => {
-        const prev = previousRatesMap[rate.currency_code]
-        const prevSell = Number(prev?.selling_rate || rate.selling_rate || 0)
-        const currentSell = Number(rate.selling_rate || 0)
-        const delta = prevSell > 0 ? ((currentSell - prevSell) / prevSell) * 100 : 0
-        const spread = spreadPercent(rate.buying_rate, rate.selling_rate)
-        const pressure = movementFromRates(rate.buying_rate, rate.selling_rate)
+    return filteredRates.map((rate) => {
+      const prev = previousRatesMap[rate.currency_code]
+      const prevBuy = prev ? Number(prev.buying_rate) : 0
+      const prevSell = prev ? Number(prev.selling_rate) : 0
+      const currBuy = Number(rate.buying_rate)
+      const currSell = Number(rate.selling_rate)
 
-        return {
-          ...rate,
-          delta,
-          spread,
-          pressure,
-          intensity: Math.abs(delta) + spread * 0.35,
-          direction: delta >= 0 ? 'up' : 'down',
-        }
-      })
-      .sort((a, b) => b.intensity - a.intensity)
-  }, [previousRatesMap, ratesData])
-
-  const topMovers = marketData.slice(0, 6)
-  const strongestRise = marketData.find((item) => item.delta >= 0) || marketData[0]
-  const strongestDrop = [...marketData].reverse().find((item) => item.delta < 0) || marketData.at(-1)
-  const tightestSpread = [...marketData].sort((a, b) => a.spread - b.spread)[0]
-  const widestSpread = [...marketData].sort((a, b) => b.spread - a.spread)[0]
-  const marketPulse = [
-    {
-      label: 'Fastest rise',
-      item: strongestRise,
-      Icon: FiTrendingUp,
-      tone: 'text-emerald-600',
-      accent: 'bg-emerald-500/12 text-emerald-700',
-    },
-    {
-      label: 'Cooling pair',
-      item: strongestDrop,
-      Icon: FiTrendingDown,
-      tone: 'text-rose-600',
-      accent: 'bg-rose-500/12 text-rose-700',
-    },
-    {
-      label: 'Tight spread',
-      item: tightestSpread,
-      Icon: FiZap,
-      tone: 'text-skybrand-700',
-      accent: 'bg-skybrand-500/12 text-skybrand-700',
-    },
-    {
-      label: 'High activity',
-      item: widestSpread,
-      Icon: FiBarChart2,
-      tone: 'text-amber-700',
-      accent: 'bg-amber-500/12 text-amber-700',
-    },
-  ].filter((entry) => entry.item)
+      return {
+        ...rate,
+        buyUp: prevBuy > 0 && currBuy > prevBuy,
+        sellUp: prevSell > 0 && currSell > prevSell,
+        buyChanged: prevBuy > 0 && currBuy !== prevBuy,
+        sellChanged: prevSell > 0 && currSell !== prevSell,
+        buyDelta: prevBuy > 0 ? ((currBuy - prevBuy) / prevBuy) * 100 : 0,
+        sellDelta: prevSell > 0 ? ((currSell - prevSell) / prevSell) * 100 : 0,
+      }
+    })
+  }, [filteredRates, previousRatesMap])
 
   return (
-    <section className="mx-auto grid w-[min(1380px,96vw)] gap-6 px-4 py-6 md:px-6 lg:gap-8 lg:px-8 lg:py-8">
+    <>
       <Seo
-        title="Rates Dashboard | Winga Forex Bureau"
-        description="Monitor live forex market intelligence, currency momentum, buy and sell movement, and spread pressure for all currencies including USD, EUR, GBP, KES, UGX, RWF and 166+ more."
-        path="/rates-dashboard"
+        title="Market Dashboard | Winga Forex Bureau"
+        description="Real-time forex market intelligence. Track live buy and sell rates for USD, EUR, GBP, KES, ZAR and 13+ African currencies. Updated every 15 seconds."
+        canonical="https://wingaforex.co.tz/rates-dashboard"
       />
-      {staleData && hasData && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <p className="font-semibold">Live provider data is currently outdated. Showing the latest verified exchange rates.</p>
-          <p className="mt-1">{staleReason || 'The Winga API is returning rates with an old effective date. Displaying the most recent data available. This auto-refreshes every 15 seconds.'}</p>
-        </div>
-      )}
-      {isError && !hasData && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <p className="font-semibold">Live rates are currently unavailable</p>
-          <p className="mt-1">Unable to connect to the Winga live rate feed. Please check your connection and try again later.</p>
-        </div>
-      )}
-      {isError && hasData && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <p className="font-semibold">Connection interrupted — showing last successful rates</p>
-          <p className="mt-1">Retrying automatically to restore live Winga pricing.</p>
-        </div>
-      )}
-      {isEmptyResult && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-6 text-center">
-          <p className="font-semibold text-amber-800">No exchange rates available</p>
-          <p className="mt-1 text-sm text-amber-700">No exchange rates available for the selected branch.</p>
-        </div>
-      )}
-      <motion.header
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[34px] border border-white/75 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.95),rgba(240,249,255,0.88),rgba(248,250,252,0.96))] p-6 shadow-[0_25px_80px_rgba(15,23,42,0.1)] backdrop-blur-xl md:p-8"
-      >
-        <div className="absolute -right-16 top-0 h-48 w-48 rounded-full bg-emerald-300/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-skybrand-300/25 blur-3xl" />
-        <div className="relative grid gap-6 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
-          <div className="max-w-4xl">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-skybrand-700">Rates Dashboard</p>
-            <h1 className="mt-3 max-w-3xl font-display text-[clamp(2rem,5vw,4rem)] leading-[0.95] text-slate-950">
-              Live forex intelligence with cleaner signals and faster market reads.
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Monitor currency momentum, buy and sell movement, spread pressure, and branch-driven activity from one premium market surface.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-slate-600">
-              {['Bloomberg-lite surface', 'Live spread watch', 'Responsive market cards'].map((pill) => (
-                <span key={pill} className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 backdrop-blur">
-                  {pill}
+
+      <section className="min-h-[calc(100vh-200px)] pb-safe">
+        <div className="mx-auto w-[min(1440px,96vw)] px-4 py-6 md:py-8">
+          <div className="mb-8 flex flex-col items-center justify-between gap-4 lg:flex-row">
+            <WingaForexLogo variant="header" />
+
+            <div className="flex items-center gap-3">
+              {lastUpdated && (
+                <span className="text-sm text-slate-500">
+                  {new Date(lastUpdated).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </span>
-              ))}
+              )}
+              <MarketStatusIndicator
+                live={!staleData}
+                hasData={hasData}
+                isFetching={isFetching}
+              />
             </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <div className="min-w-[220px] rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur">
-                <p className="text-[0.65rem] uppercase tracking-[0.22em] text-slate-500">Market focus</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{selectedBranch?.branch_name || 'Select a branch for live pricing'}</p>
-              </div>
-              <div className="min-w-[220px] rounded-2xl border border-white/80 bg-slate-950 px-4 py-3 text-white shadow-xl shadow-slate-950/10">
-                <p className="text-[0.65rem] uppercase tracking-[0.22em] text-slate-300">Status</p>
-                <div className="mt-2 flex items-center gap-2 text-sm font-semibold">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {isFetching ? 'Refreshing live market' : 'Streaming live indicators'}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3 rounded-[28px] border border-white/80 bg-white/72 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <BranchSelector />
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white">
-                <FiClock size={12} />
-                {lastUpdated ? `Updated ${formatTime(lastUpdated)}` : 'Awaiting first update'}
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {topMovers.slice(0, 3).map((item) => {
-                const positive = item.direction === 'up'
-                return (
-                  <article key={item.currency_code} className="rounded-2xl border border-slate-200/80 bg-white/90 p-4">
-                    <div className="flex items-center gap-3">
-<img
-                         src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
-                         alt={`${item.currency_code} flag`}
-                         className="h-5 w-8 rounded object-cover shadow-sm"
-                         loading="lazy"
-                         onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
-                       />
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">{item.currency_code}</p>
-                        <p className="text-xs text-slate-500">{item.currency_actual_name}</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 h-16 overflow-hidden rounded-2xl bg-slate-50 px-2">
-                      <SparklineChart up={positive} value={item.selling_rate || 1} />
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-xs">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold ${positive ? 'bg-emerald-500/12 text-emerald-700' : 'bg-rose-500/12 text-rose-700'}`}>
-                        {positive ? <FiArrowUpRight size={12} /> : <FiArrowDownRight size={12} />}
-                        {formatDelta(item.delta)}
-                      </span>
-                      <span className="text-slate-500">Spread {item.spread.toFixed(2)}%</span>
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </motion.header>
-
-      <motion.div
-        variants={revealGroup}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
-      >
-        <motion.div variants={revealCard}>
-          <MetricCard
-          label="Live pairs"
-          value={`${marketData.length}`}
-          detail="Active currencies with current buy and sell movement."
-          Icon={FiActivity}
-          tone="bg-gradient-to-r from-skybrand-500 to-cyan-400"
-          />
-        </motion.div>
-        <motion.div variants={revealCard}>
-          <MetricCard
-          label="Top momentum"
-          value={strongestRise ? strongestRise.currency_code : 'N/A'}
-          detail={strongestRise ? `${formatDelta(strongestRise.delta)} vs previous tick` : 'Waiting for enough price history.'}
-          Icon={FiTrendingUp}
-          tone="bg-gradient-to-r from-emerald-500 to-cyan-400"
-          />
-        </motion.div>
-        <motion.div variants={revealCard}>
-          <MetricCard
-          label="Market pulse"
-          value={widestSpread ? `${widestSpread.spread.toFixed(2)}%` : '0.00%'}
-          detail={widestSpread ? `${widestSpread.currency_code} is carrying the widest live spread.` : 'Pulse will appear after branch pricing loads.'}
-          Icon={FiBarChart2}
-          tone="bg-gradient-to-r from-amber-400 to-orange-400"
-          />
-        </motion.div>
-        <motion.div variants={revealCard}>
-          <MetricCard
-          label="Branch watch"
-          value={selectedBranch?.branch_name || 'Branch pending'}
-          detail="All market analytics are scoped to the selected bureau branch."
-          Icon={FiRefreshCw}
-          tone="bg-gradient-to-r from-slate-800 to-slate-500"
-          />
-        </motion.div>
-      </motion.div>
-
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <section className="rounded-[30px] border border-white/75 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-500">Market pulse</p>
-              <h2 className="mt-2 font-display text-[clamp(1.45rem,3vw,2rem)] text-slate-950">Live movement snapshot</h2>
-            </div>
-            <span className="rounded-full bg-skybrand-500/10 px-3 py-1 text-xs font-semibold text-skybrand-700">Updated continuously</span>
           </div>
 
           <motion.div
             variants={revealGroup}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            className="mt-5 grid gap-3"
+            animate="visible"
+            className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
-            {marketPulse.map(({ label, item, Icon, tone, accent }) => (
-              <motion.article key={label} variants={revealCard} className="rounded-[24px] border border-slate-200/80 bg-white/90 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-500">{label}</p>
-                    <div className="mt-2 flex items-center gap-2">
-<img
-                         src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
-                         alt={`${item.currency_code} flag`}
-                         className="h-5 w-8 rounded object-cover shadow-sm"
-                         loading="lazy"
-                         onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
-                       />
-                      <p className="text-base font-semibold text-slate-950">{item.currency_code}</p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-600 whitespace-nowrap">
-                      Buy {formatRate(item.buying_rate)} · Sell {formatRate(item.selling_rate)}
-                    </p>
-                  </div>
-                  <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${accent}`}>
-                    <Icon size={18} className={tone} />
-                  </span>
-                </div>
-                <div className="mt-4 h-16 overflow-hidden rounded-2xl bg-slate-50 px-2">
-                  <SparklineChart up={item.direction === 'up'} value={item.selling_rate || 1} />
-                </div>
-                <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                  <span>{formatDelta(item.delta)}</span>
-                  <span>Pressure {item.pressure.toFixed(2)}%</span>
-                </div>
-              </motion.article>
-            ))}
+            <motion.div variants={revealItem}>
+              <MarketSummaryCard
+                label="Currencies"
+                value={hasData ? marketData.length : '—'}
+                detail={hasData ? `${filteredRates.length} available` : 'No rates loaded'}
+                Icon={FiActivity}
+                tone="sky"
+              />
+            </motion.div>
+
+            <motion.div variants={revealItem}>
+              <MarketSummaryCard
+                label="Last Updated"
+                value={lastUpdated ? formatTime(lastUpdated) : '—'}
+                detail={staleData ? 'Stale' : 'Live'}
+                Icon={FiRefreshCw}
+                tone={staleData ? 'amber' : 'emerald'}
+              />
+            </motion.div>
+
+            <motion.div variants={revealItem}>
+              <MarketSummaryCard
+                label="Best Buy"
+                value={hasData ? marketData.reduce((best, r) => Number(r.buying_rate) > best ? Number(r.buying_rate) : best, 0).toFixed(2) : '—'}
+                detail="Highest buy rate available"
+                Icon={FiActivity}
+                tone="navy"
+              />
+            </motion.div>
+
+            <motion.div variants={revealItem}>
+              <MarketSummaryCard
+                label="Status"
+                value={<MarketStatusIndicator live={!staleData} hasData={hasData} isFetching={isFetching} />}
+                detail={staleData ? 'Stale' : 'Live'}
+                Icon={FiActivity}
+                tone="sky"
+              />
+            </motion.div>
           </motion.div>
-        </section>
-
-        <section className="rounded-[30px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.96))] p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-500">Trending forex</p>
-              <h2 className="mt-2 font-display text-[clamp(1.45rem,3vw,2rem)] text-slate-950">Top moving currencies</h2>
-            </div>
-            <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-              Mini analytics + live indicators
-            </div>
-          </div>
 
           <motion.div
-            variants={revealGroup}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 flex flex-col items-center justify-between gap-4 rounded-[28px] border border-white/50 bg-white/60 p-4 shadow-[0_12px_40px_rgba(15,23,42,0.05)] backdrop-blur-xl sm:flex-row"
           >
-            {topMovers.map((item, index) => {
-              const positive = item.direction === 'up'
-              return (
-                <motion.article
-                  key={item.currency_code}
-                  variants={revealCard}
-                  className={`rounded-[26px] border border-white/80 bg-gradient-to-br ${marketThemes[index % marketThemes.length]} p-4 shadow-sm`}
+            <div className="flex items-center gap-2">
+              <BranchSelector compact />
+              {hasData && (
+                <span className="hidden text-xs text-slate-500 sm:block">
+                  {marketData.length} pairs for {selectedBranch?.branch_abbr || 'HEAD OFFICE'}
+                </span>
+              )}
+            </div>
+
+            <div className="relative w-full max-w-md">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search currency code or name..."
+                className="w-full rounded-[18px] border border-white/60 bg-white/80 px-4 py-3 pl-10 text-sm text-navysoft placeholder-slate-400 shadow-inner focus:border-skybrand-300 focus:outline-none focus:ring-2 focus:ring-skybrand-200"
+                aria-label="Search currencies"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-700"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <img
-                        src={getFlagUrl(item.currency_code) || getCurrencyBadge(item.currency_code)}
-                        alt={`${item.currency_code} flag`}
-                        className="h-5 w-8 rounded object-cover shadow-sm"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.src = getCurrencyBadge(item.currency_code) }}
-                      />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-950">{item.currency_code}</p>
-                        <p className="truncate text-xs text-slate-500">{item.currency_actual_name}</p>
-                      </div>
-                    </div>
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${positive ? 'bg-emerald-500/12 text-emerald-700' : 'bg-rose-500/12 text-rose-700'}`}>
-                      {positive ? <FiArrowUpRight size={12} /> : <FiArrowDownRight size={12} />}
-                      {formatDelta(item.delta)}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 h-16 overflow-hidden rounded-2xl border border-white/80 bg-white/70 px-2 backdrop-blur">
-                    <SparklineChart up={positive} value={item.selling_rate || 1} />
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                    <div className="rounded-2xl bg-white/80 px-4 py-3">
-                      <p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Buy</p>
-                      <p className="mt-1 font-semibold text-slate-950 whitespace-nowrap text-[clamp(0.92rem,2.4vw,1.1rem)]">{formatRate(item.buying_rate)}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white/80 px-4 py-3">
-                      <p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Sell</p>
-                      <p className="mt-1 font-semibold text-slate-950 whitespace-nowrap text-[clamp(0.92rem,2.4vw,1.1rem)]">{formatRate(item.selling_rate)}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-600">
-                    <span>Spread {item.spread.toFixed(2)}%</span>
-                    <span>Pressure {item.pressure.toFixed(2)}%</span>
-                  </div>
-                </motion.article>
-              )
-            })}
+                  <FiX size={14} />
+                </button>
+              )}
+            </div>
           </motion.div>
-        </section>
-      </div>
-    </section>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mb-6 flex justify-center"
+          >
+            <BuySellTabs value={rateView} onChange={setRateView} />
+          </motion.div>
+
+          {isError && !hasData && (
+            <div className="mb-6 rounded-[18px] border border-red-200 bg-red-50/50 p-4 text-center text-sm text-red-800">
+              Unable to connect to the Winga live rate feed.
+            </div>
+          )}
+
+          {isError && hasData && (
+            <div className="mb-4 rounded-[18px] border border-amber-200 bg-amber-50/50 p-2 text-xs text-amber-800">
+              Stale data
+            </div>
+          )}
+
+          {staleData && hasData && (
+            <div className="mb-4 rounded-[18px] border border-amber-200 bg-amber-50/50 p-2 text-xs text-amber-800">
+              Stale data
+            </div>
+          )}
+
+          {hasData && marketData.length === 0 && !isFetching && (
+            <div className="rounded-[22px] border border-slate-200/80 bg-white/70 p-8 text-center backdrop-blur-xl">
+              <p className="text-slate-600">
+                No currencies match <strong className="text-navysoft">"{search}"</strong>
+              </p>
+              <button
+                onClick={() => setSearch('')}
+                className="mt-3 rounded-xl border border-skybrand-200 bg-white px-4 py-2 text-sm font-semibold text-skybrand-700 hover:bg-skybrand-50"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
+
+          <motion.div
+            variants={revealGroup}
+            initial="hidden"
+            animate="visible"
+            className="hidden lg:block"
+          >
+            {!hasData && isFetching ? (
+              <div className="overflow-x-auto rounded-[22px] border border-white/50 bg-white/60 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+                <table className="w-full min-w-[760px] table-fixed text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-white/50 bg-white/50">
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Currency</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Full Name</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Buy (TZS)</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Sell (TZS)</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Change</th>
+                      <th className="hidden xl:table-cell px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Spread</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={`skeleton-${i}`} className="border-b border-slate-50/50 last:border-none">
+                        <td className="px-3 py-4"><div className="h-4 w-12 rounded bg-slate-200 animate-pulse" /></td>
+                        <td className="px-3 py-4"><div className="h-4 w-40 rounded bg-slate-200 animate-pulse" /></td>
+                        <td className="px-3 py-4 text-right"><div className="h-4 w-16 rounded bg-slate-200 animate-pulse ml-auto" /></td>
+                        <td className="px-3 py-4 text-right"><div className="h-4 w-16 rounded bg-slate-200 animate-pulse ml-auto" /></td>
+                        <td className="px-3 py-4 text-center"><div className="h-4 w-10 rounded bg-slate-200 animate-pulse mx-auto" /></td>
+                        <td className="hidden xl:table-cell px-3 py-4 text-right"><div className="h-4 w-10 rounded bg-slate-200 animate-pulse ml-auto" /></td>
+                        <td className="px-3 py-4"><div className="h-4 w-16 rounded bg-slate-200 animate-pulse" /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : hasData ? (
+            <div className="overflow-x-auto rounded-[22px] border border-white/50 bg-white/60 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+              <table className="w-full min-w-[760px] table-fixed text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/50 bg-white/50">
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Currency</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Full Name</th>
+                    <th className={`px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider ${rateView === 'buy' ? 'text-skybrand-700' : 'text-slate-400'}`}>Buy (TZS)</th>
+                    <th className={`px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider ${rateView === 'sell' ? 'text-skybrand-700' : 'text-slate-400'}`}>Sell (TZS)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Change</th>
+                    <th className="hidden xl:table-cell px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Spread</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {marketData.map((rate) => {
+                    const spread = spreadPercent(rate.buying_rate, rate.selling_rate)
+                    const activeUp = rateView === 'buy' ? rate.buyUp : rate.sellUp
+                    const activeDelta = rateView === 'buy' ? rate.buyDelta : rate.sellDelta
+                    const activeChanged = rateView === 'buy' ? rate.buyChanged : rate.sellChanged
+
+                    return (
+                      <tr
+                        key={rate.currency_code}
+                        className="border-b border-slate-50/50 last:border-none transition-colors hover:bg-skybrand-50/30"
+                      >
+                        <td className="px-3 py-4">
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <Flag code={rate.currency_code} size="md" className="flex-shrink-0" />
+                            <span className="font-bold text-navysoft">{rate.currency_code}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-3 py-4 text-sm text-slate-600">
+                          <span className="block max-w-[200px] break-words leading-5">
+                            {rate.currency_actual_name}
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-4 text-right">
+                          <span
+                            className={`inline-block font-semibold whitespace-nowrap transition-all ${
+                              rateView === 'buy'
+                                ? 'text-[clamp(0.85rem,2vw,1rem)] text-skybrand-700'
+                                : 'text-slate-700'
+                            }`}
+                          >
+                            {formatRate(rate.buying_rate)}
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-4 text-right">
+                          <span
+                            className={`inline-block font-semibold whitespace-nowrap transition-all ${
+                              rateView === 'sell'
+                                ? 'text-[clamp(0.85rem,2vw,1rem)] text-skybrand-700'
+                                : 'text-slate-700'
+                            }`}
+                          >
+                            {formatRate(rate.selling_rate)}
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-4 text-center">
+                          {activeChanged && (
+                            <span
+                              className={`inline-flex items-center justify-center gap-0.5 rounded-full px-2 py-1 text-xs font-semibold ${
+                                activeUp
+                                  ? 'bg-market-up/10 text-market-up'
+                                  : 'bg-market-down/10 text-market-down'
+                              }`}
+                            >
+                              {activeUp ? (
+                                <FiArrowUpRight size={10} />
+                              ) : (
+                                <FiArrowDownRight size={10} />
+                              )}
+                              {Math.abs(activeDelta).toFixed(2)}%
+                            </span>
+                          )}
+                          {!activeChanged && <span className="text-xs text-slate-400">—</span>}
+                        </td>
+
+                        <td className="hidden xl:table-cell px-3 py-4 text-right text-sm text-slate-500">
+                          {spread.toFixed(2)}%
+                        </td>
+
+                        <td className="px-3 py-4">
+                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                            {rate.source || 'winga-live'}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            ) : (
+            <div className="overflow-x-auto rounded-[22px] border border-white/50 bg-white/60 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+              <table className="w-full min-w-[760px] table-fixed text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/50 bg-white/50">
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Currency</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Full Name</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Buy (TZS)</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Sell (TZS)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Change</th>
+                    <th className="hidden xl:table-cell px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Spread</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan="7" className="px-4 py-12 text-center text-sm text-slate-500">
+                      {isFetching ? 'Loading live rates...' : isError ? 'Live rates temporarily unavailable. Please try again later.' : 'No rates available.'}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            variants={revealGroup}
+            initial="hidden"
+            animate="visible"
+            className="lg:hidden"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {marketData.map((rate) => (
+                <motion.div key={rate.currency_code} variants={revealItem}>
+                  <MarketRateCard rate={rate} prev={previousRatesMap[rate.currency_code]} />
+                </motion.div>
+              ))}
+              {isFetching && hasData === false && Array.from({ length: 4 }).map((_, i) => (
+                <CurrencyCardSkeleton key={`skeleton-${i}`} />
+              ))}
+              {!hasData && !isFetching && (
+                <div className="col-span-full rounded-[22px] border border-white/50 bg-white/60 p-8 text-center backdrop-blur-xl">
+                  <p className="text-sm text-slate-500">
+                    {isError ? 'Live rates temporarily unavailable. Please try again later.' : 'No rates available.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   )
 }

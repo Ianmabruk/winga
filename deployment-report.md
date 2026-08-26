@@ -1,28 +1,29 @@
 # Deployment Validation Report
 
-- **Generated:** 2026-07-09T16:09:46.735Z
+- **Generated:** 2026-08-18T23:09:43.838Z
 - **Status:** PASS
 - **Frontend:** `/home/ian-mabruk/burea/burea`
 - **Build artifact:** `/home/ian-mabruk/burea/burea/dist` (`index.html` present)
 - **.htaccess present:** yes
 
 ## Routing status
-- Routes tested: 22, fall-through OK: 22
+- Routes tested: 23, fall-through OK: 23
 - ✅ Every route falls back to index.html (refresh-safe).
 
 ## Checks
 - ✅ dist/.htaccess present — /home/ian-mabruk/burea/burea/dist/.htaccess
 - ✅ .htaccess rule: RewriteEngine On
 - ✅ .htaccess rule: RewriteBase /
-- ✅ .htaccess rule: RewriteRule ^index\.html$ - [L]
+- ✅ .htaccess rule: RewriteRule ^index.html$ - [L]
 - ✅ .htaccess rule: !-f condition
 - ✅ .htaccess rule: !-d condition
+- ✅ .htaccess rule: API exclusion (!^/api/)
 - ✅ .htaccess rule: RewriteRule . /index.html [L]
 - ✅ .htaccess rule: ErrorDocument 404 /index.html
 - ✅ dist/index.html present — /home/ian-mabruk/burea/burea/dist/index.html
 - ✅ All index.html asset references resolve — 8 local refs checked
 - ✅ Asset paths are root-relative (base "/") — refreshes on sub-routes cannot blank-page
-- ✅ All routes fall back to index.html on refresh — 22 routes validated (incl. /projects, /about, /contact)
+- ✅ All routes fall back to index.html on refresh — 23 routes validated (incl. /projects, /about, /contact)
 - ✅ No SSR dependency (client-only SPA) — index.html mounts #root; no ReactDOMServer usage
 - ✅ Deployment package carries .htaccess — /home/ian-mabruk/burea/.cpanel-deployment/public_html-ready
 - ✅ Deployment package carries index.html — /home/ian-mabruk/burea/.cpanel-deployment/public_html-ready
@@ -30,7 +31,7 @@
 ## API connectivity
 - Backend origin: `https://winga-backend.onrender.com`
 - ✅ VITE_API_URL configured — https://winga-backend.onrender.com
-- ✅ GET /health — HTTP 200
+- ⚠️  GET /health — unreachable / offline (skipped)
 - ⚠️  GET /api/rates/live?branch=HEAD OFFICE — unreachable / offline (skipped)
 
 

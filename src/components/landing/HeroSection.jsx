@@ -2,16 +2,39 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FiArrowRight, FiTrendingUp, FiTrendingDown, FiShield, FiZap, FiGlobe } from 'react-icons/fi'
 import { useForexStore } from '../../store/useForexStore'
+import { useRates } from '../../hooks/useRates'
 import { getFlagUrl } from '../../data/flags'
 import { formatRate } from '../../utils/formatters'
-import forexHero from '../../assets/forex-hero-currencies.jpg'
+import forexHero from '../../assets/forex-hero-currencies.webp'
 
 const heroRates = ['USD','EUR','GBP','AED']
 
 function HeroRateCard({ code, index }) {
   const ratesMap = useForexStore((s) => s.ratesMap)
   const r = ratesMap[code]
-  if (!r) return null
+  if (!r) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 + index * 0.1 }}
+        className="bg-white/70 backdrop-blur-xl border border-skybrand-200/60 rounded-2xl p-4 shadow-glass"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-7 rounded bg-slate-200 animate-pulse" />
+            <div className="h-4 w-8 rounded bg-slate-200 animate-pulse" />
+          </div>
+          <div className="h-4 w-8 rounded bg-slate-200 animate-pulse" />
+        </div>
+        <div className="mt-2 h-3 w-full rounded bg-slate-200 animate-pulse" />
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="h-8 rounded bg-slate-200 animate-pulse" />
+          <div className="h-8 rounded bg-slate-200 animate-pulse" />
+        </div>
+      </motion.div>
+    )
+  }
   const up = Number(r.selling_rate) >= Number(r.buying_rate)
   return (
     <motion.div
@@ -58,6 +81,8 @@ const features = [
 ]
 
 export default function HeroSection() {
+  useRates()
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-skybrand-50 via-white to-orange-50/30 py-16 md:py-24">
       {/* Background decorations */}
@@ -124,6 +149,8 @@ export default function HeroSection() {
                 alt="International Currency Exchange"
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
             </div>
 

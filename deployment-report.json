@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-09T16:09:46.735Z",
+  "generatedAt": "2026-08-18T23:09:43.838Z",
   "frontendDir": "/home/ian-mabruk/burea/burea",
   "distDir": "/home/ian-mabruk/burea/burea/dist",
   "buildStatus": "present",
   "htaccessPresent": true,
   "routingValidation": {
-    "routesTested": 22,
-    "total": 22,
+    "routesTested": 23,
+    "total": 23,
     "problems": []
   },
   "assetValidation": {
@@ -22,8 +22,8 @@
       },
       {
         "name": "GET /health",
-        "ok": true,
-        "detail": "HTTP 200"
+        "ok": null,
+        "detail": "unreachable / offline (skipped)"
       },
       {
         "name": "GET /api/rates/live?branch=HEAD OFFICE",
@@ -52,7 +52,7 @@
       "critical": true
     },
     {
-      "name": ".htaccess rule: RewriteRule ^index\\.html$ - [L]",
+      "name": ".htaccess rule: RewriteRule ^index.html$ - [L]",
       "ok": true,
       "detail": "",
       "critical": true
@@ -65,6 +65,12 @@
     },
     {
       "name": ".htaccess rule: !-d condition",
+      "ok": true,
+      "detail": "",
+      "critical": true
+    },
+    {
+      "name": ".htaccess rule: API exclusion (!^/api/)",
       "ok": true,
       "detail": "",
       "critical": true
@@ -102,7 +108,7 @@
     {
       "name": "All routes fall back to index.html on refresh",
       "ok": true,
-      "detail": "22 routes validated (incl. /projects, /about, /contact)",
+      "detail": "23 routes validated (incl. /projects, /about, /contact)",
       "critical": true
     },
     {

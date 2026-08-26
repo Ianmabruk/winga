@@ -8,21 +8,33 @@ import RouteDebugProbe from './components/RouteDebugProbe'
 import './index.css'
 import App from './App.jsx'
 import { initRuntimeDebug } from './utils/runtimeDebug'
+import { useForexStore } from './store/useForexStore'
 
 initRuntimeDebug()
+
+// Hydrate the centralized rate store from the server-injected bootstrap
+// snapshot (window.__INITIAL_RATES__).  This ensures the LiveTicker and
+// HeroSection rate cards render immediately on first paint, before any
+// network request completes.
+if (typeof window !== 'undefined' && window.__INITIAL_RATES__?.rates?.length > 0) {
+  const initial = window.__INITIAL_RATES__
+  useForexStore.getState().setRatesData(
+    initial.rates,
+    initial.stale || false,
+    initial.stale ? 'Showing cached snapshot from server' : null,
+    initial.providerTimestamp || null,
+    false,
+  )
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Live forex data must never be served from cache across browsers.
-      // Chrome's HTTP cache is more aggressive than Firefox/Safari, so we
-      // enforce zero stale time at the React Query layer as well.
-      staleTime: 0,
+      staleTime: 5_000,
       gcTime: 30_000,
-      retry: 2,
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
+      retry: 0,
       refetchOnMount: true,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       refetchOnReconnect: true,
     },
   },

@@ -1,18 +1,40 @@
-// Rate source: LIVE Winga API (via /api/rates/live) is the primary source.
-// No synthetic / generated rates are ever produced here. If Winga is unavailable
-// the frontend surfaces an error state so users know the live feed is down.
+// Rate source: Cache-first architecture.
+// The frontend always communicates with OUR backend, never directly with the
+// Winga provider.  The backend maintains a persistent cached snapshot of the
+// latest RAW Winga response and returns it immediately from
+//   - Database (exchange_rates table)
+//   - In-memory cache (syncService.cachedRates)
+//   - File snapshot (last-snapshot.json)
+//
+// The browser must NOT call the Winga API directly.  Provider credentials
+// must stay server-side.  If the backend is unreachable, the frontend returns
+// an empty rates array (controlled state) so the UI can show a fallback
+// without blocking the user for an extended period.
 //
 // Chrome caches cross-origin fetch responses more aggressively than Firefox/Safari.
-// To guarantee identical live-rate behaviour across all browsers, every request
-// disables the HTTP cache via `cache: "no-store"`, sends anti-cache headers, and
-// appends a cache-busting timestamp query parameter.
+// To guarantee identical behaviour across all browsers, every request disables
+// the HTTP cache via `cache: "no-store"`, sends anti-cache headers, and appends
+// a cache-busting timestamp query parameter.
 
-import { API_URL } from '../lib/http'
+import { API_URL } from '../lib/config'
 
-const PROXY_BASE = `${API_URL}/api/rates/live`
+const CACHE_BASE = `${API_URL}/api/rates`
+const LIVE_BASE = `${API_URL}/api/rates/live`
 const BRANCHES_BASE = `${API_URL}/api/rates/branches`
 
-const STALE_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour — rates should refresh every 15 seconds
+// Same-origin fallback proxy (cPanel /api/winga-rates.php) — returns cached
+// rates immediately (no synchronous provider call).
+const SAME_ORIGIN_FALLBACK = '/api/winga-rates.php'
+
+// Timeout for each fetch attempt.  When the backend is slow to respond we
+// fall back to the same-origin cache rather than hanging the page.
+const FETCH_TIMEOUT_MS = Number(import.meta.env.VITE_FETCH_TIMEOUT_MS) || 5_000
+
+// Short delay before retry — allows the browser's Happy Eyeballs algorithm
+// to prefer IPv4 on mobile carriers / dual-stack networks.
+const RETRY_DELAY_MS = Number(import.meta.env.VITE_RETRY_DELAY_MS) || 300
+
+const STALE_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour
 
 const CACHE_BUST = () => `t=${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
 
@@ -20,17 +42,7 @@ const NO_CACHE_HEADERS = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Pragma: 'no-cache',
   Expires: '0',
-}
-
-const buildDebugInfo = () => {
-  if (typeof window === 'undefined') return null
-  return {
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    isChrome: /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor),
-    cookieEnabled: navigator.cookieEnabled,
-    storage: typeof localStorage !== 'undefined' ? 'localStorage available' : 'no localStorage',
-  }
+  Accept: 'application/json',
 }
 
 const logDebug = (label, data) => {
@@ -45,16 +57,54 @@ const fetchNoCache = async (url, { method = 'GET', headers = {} } = {}) => {
   const bustUrl = `${url}${separator}${CACHE_BUST()}`
   logDebug('request-url', { url: bustUrl, method, headers })
 
-  const response = await fetch(bustUrl, {
-    method,
-    headers: { ...NO_CACHE_HEADERS, ...headers },
-    cache: 'no-store',
-    credentials: 'same-origin',
-    mode: 'cors',
-  })
+  const doFetch = async (signal) => {
+    return await fetch(bustUrl, {
+      method,
+      headers: { ...NO_CACHE_HEADERS, ...headers },
+      cache: 'no-store',
+      credentials: 'omit',
+      mode: 'cors',
+      signal,
+    })
+  }
 
-  logDebug('response-status', { url: bustUrl, status: response.status, statusText: response.statusText })
-  return response
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
+  try {
+    try {
+      const response = await doFetch(controller.signal)
+      logDebug('response-status', { url: bustUrl, status: response.status, statusText: response.statusText })
+      return response
+    } catch (err) {
+      // Network errors — retry once after a short delay.  This handles
+      // transient IPv6 resolution failures on mobile carriers and dual-stack
+      // networks where IPv6 is preferred but broken.
+      clearTimeout(timer)
+      logDebug('request-error-retry', { url: bustUrl, error: err.message })
+
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
+
+      const retryController = new AbortController()
+      const retryTimer = setTimeout(() => retryController.abort(), FETCH_TIMEOUT_MS)
+      try {
+        const response = await doFetch(retryController.signal)
+        logDebug('response-status-retry', { url: bustUrl, status: response.status, statusText: response.statusText })
+        return response
+      } finally {
+        clearTimeout(retryTimer)
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      logDebug('request-timeout', { url: bustUrl, timeout: FETCH_TIMEOUT_MS })
+      throw new Error(`Request timed out after ${FETCH_TIMEOUT_MS / 1000}s`, { cause: err })
+    }
+    logDebug('request-error', { url: bustUrl, error: err.message })
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 const parseEffectiveDate = (dateStr) => {
@@ -76,10 +126,13 @@ const normalizeRateData = (data) => {
   if (!data || typeof data !== 'object') return []
 
   // Collect raw entries from the Winga API response
+  // Live endpoint returns { message: [...] } or { message: {...} }
+  // Cached endpoint returns { rates: [...] } (already-normalized entries)
   const raw = Array.isArray(data.message) ? data.message
     : (data.message && typeof data.message === 'object' && !Array.isArray(data.message))
       ? Object.values(data.message)
-      : (Array.isArray(data) ? data : [])
+      : (Array.isArray(data.rates) ? data.rates
+        : (Array.isArray(data) ? data : []))
 
   // Group by currency_code — Winga may return multiple rows per currency
   // (e.g. USD for different bill denominations). We must pick the canonical
@@ -100,23 +153,25 @@ const normalizeRateData = (data) => {
     let chosen = entries[0]
 
     if (entries.length > 1) {
-      // Preference 1: canonical entry where currency_name === currency_code
-      chosen = entries.find((e) =>
-        String(e.currency_name || '').toUpperCase() === code
-      )
-      // Preference 2: canonical actual_name starting with the code
-      if (!chosen) {
-        chosen = entries.find((e) =>
-          String(e.currency_actual_name || '').toUpperCase().startsWith(code)
-        )
+      // Match backend syncService.fetchWingaRates deduplication logic:
+      // iterate in order, override with standard-denom, then canonical.
+      for (let i = 1; i < entries.length; i++) {
+        const entry = entries[i]
+        const name = String(entry.currency_name || '').toUpperCase()
+        const actual = String(entry.currency_actual_name || '').toUpperCase()
+        const isStandardDenom =
+          (name.startsWith(code + ' ($') || actual.startsWith(code + ' ($')) &&
+          !/\(\d{4}/.test(name) &&
+          !/\(\d{4}/.test(actual)
+        const isCanonical = name === code
+
+        if (isCanonical) {
+          chosen = entry
+        } else if (isStandardDenom) {
+          chosen = entry
+        }
       }
-      // Preference 3: highest buying_rate (most likely the standard, not old-denomination rate)
-      if (!chosen) {
-        chosen = entries.reduce(
-          (best, e) => Number(e.buying_rate) > Number(best.buying_rate) ? e : best,
-          entries[0],
-        )
-      }
+
       logDebug('duplicate-currency', {
         code,
         count: entries.length,
@@ -137,10 +192,7 @@ const normalizeRateData = (data) => {
     const isRateStale = effDate ? (Date.now() - effDate.getTime() > STALE_THRESHOLD_MS) : false
 
     if (isRateStale) {
-      const ageMin = Math.round((Date.now() - effDate.getTime()) / 60_000)
-      console.warn(
-        `[wingaForexService] Stale rate for ${code}: effective_date_and_time=${chosen.effective_date_and_time} (${ageMin} minutes old)`,
-      )
+      logDebug('stale-rate', { code, effectiveDate: chosen.effective_date_and_time })
     }
 
     rates.push({
@@ -169,6 +221,10 @@ const loadBranches = async () => {
   try {
     const response = await fetchNoCache(BRANCHES_BASE)
     if (!response.ok) throw new Error(`Branch API error: ${response.status}`)
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Branch API returned non-JSON response: ${contentType}`)
+    }
     const data = await response.json()
     let branches = data.message || []
     if (!Array.isArray(branches) || branches.length === 0) {
@@ -179,21 +235,52 @@ const loadBranches = async () => {
       ? branches
       : [{ branch_name: 'HEAD OFFICE', branch_abbr: 'HO', city: 'Dar es Salaam', country: 'Tanzania', status: 'active' }]
   } catch (err) {
-    console.error('[wingaForexService] Branch fetch failed, using default:', err.message)
+    logDebug('branches-failed', { error: err.message })
     return [{ branch_name: 'HEAD OFFICE', branch_abbr: 'HO', city: 'Dar es Salaam', country: 'Tanzania', status: 'active' }]
   }
 }
 
-const loadRates = async (branchName = 'HEAD OFFICE') => {
+const loadCachedRates = async (branchName = 'HEAD OFFICE') => {
   const safeBranch = String(branchName || '').trim()
   const branch = safeBranch.length ? safeBranch : 'HEAD OFFICE'
 
-  const response = await fetchNoCache(`${PROXY_BASE}?branch_name=${encodeURIComponent(branch)}`)
-  logDebug('rates-fetched', { branch, status: response.status, debug: buildDebugInfo() })
+  try {
+    const response = await fetchNoCache(`${CACHE_BASE}?branch_name=${encodeURIComponent(branch)}`)
+    logDebug('cached-rates-fetched', { branch, status: response.status })
+
+    if (!response.ok) {
+      throw new Error(`Cached rates API error: ${response.status}`)
+    }
+
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Cached rates API returned non-JSON response: ${contentType}`)
+    }
+
+    const data = await response.json()
+    logDebug('cached-rates-raw', { branch, body: data })
+
+    const normalized = normalizeRateData(data)
+    logDebug('cached-rates-parsed', { branch, count: normalized.length })
+
+    return {
+      rates: normalized,
+      source: data.source || 'database',
+      lastUpdated: data.updated_at || data.lastUpdated || null,
+      providerTimestamp: data.providerTimestamp || null,
+      stale: data.stale || false,
+    }
+  } catch (err) {
+    logDebug('cached-rates-failed', { error: err.message })
+    return { rates: [], source: 'unavailable', lastUpdated: null, providerTimestamp: null, stale: true }
+  }
+}
+
+const fetchLiveRates = async (branch) => {
+  const response = await fetchNoCache(`${LIVE_BASE}?branch_name=${encodeURIComponent(branch)}`)
 
   if (!response.ok) {
-    const errBody = await response.text().catch(() => '')
-    throw new Error(`Rates API error: ${response.status} ${errBody.slice(0, 200)}`)
+    throw new Error(`Rates API error: ${response.status}`)
   }
 
   const contentType = response.headers.get('content-type') || ''
@@ -228,19 +315,96 @@ const loadRates = async (branchName = 'HEAD OFFICE') => {
   })
 
   if (normalized.length > 0) {
-    console.log('[wingaForexService] Live Winga rates loaded:', normalized.length, 'currencies for branch:', branch)
+    logDebug('cached-rates-loaded', { count: normalized.length, branch, staleTimestamp })
     if (staleTimestamp) {
-      console.warn(
-        '[wingaForexService] WARNING: Provider timestamp is outdated. ' +
-          'Rates are current but the effective_date_and_time field is stale. ' +
-          `Reason: ${staleReason}`,
-      )
+      logDebug('provider-stale', { message: 'Provider timestamp stale. Rates are current.' })
     }
   } else {
-    console.warn('[wingaForexService] Winga API returned empty rates (message:[]) for branch:', branch)
+    logDebug('no-cached-rates', { branch })
   }
 
-  return { rates: normalized, stale: isProviderStale, staleTimestamp, staleReason, providerTimestamp: data.providerTimestamp }
+  return {
+    rates: normalized,
+    stale: isProviderStale,
+    staleTimestamp,
+    staleReason,
+    providerTimestamp: data.providerTimestamp || data.updated_at || null,
+    source: data.source || 'database',
+    lastUpdated: data.updated_at || null,
+  }
 }
 
-export { loadBranches, loadRates, normalizeRateData }
+const fetchCachedRates = async (branch) => {
+  const response = await fetchNoCache(`${SAME_ORIGIN_FALLBACK}?branch_name=${encodeURIComponent(branch)}`)
+
+  if (!response.ok) {
+    throw new Error(`Fallback API error: ${response.status}`)
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Fallback API returned non-JSON response: ${contentType}`)
+  }
+
+  const data = await response.json()
+  const normalized = normalizeRateData(data)
+
+  logDebug('fallback-rates-loaded', { count: normalized.length, branch, source: data.source })
+
+  return {
+    rates: normalized,
+    stale: data.stale === true,
+    staleTimestamp: false,
+    staleReason: data.stale ? 'Rates may be stale — background refresh in progress' : null,
+    providerTimestamp: data.providerTimestamp || data.updated_at || null,
+    source: data.source || 'fallback',
+    lastUpdated: data.updated_at || null,
+  }
+}
+
+const loadRates = async (branchName = 'HEAD OFFICE') => {
+  const safeBranch = String(branchName || '').trim()
+  const branch = safeBranch.length ? safeBranch : ''
+
+  let lastError
+
+  // We always go through OUR backend — never directly to the Winga provider.
+  // The backend serves the latest cached snapshot (DB → in-memory → file)
+  // and triggers background sync independently.
+  const sources = [
+    () => fetchLiveRates(branch),
+    () => fetchCachedRates(branch),
+  ]
+
+  for (const fn of sources) {
+    try {
+      const result = await fn()
+      if (result && result.rates && result.rates.length > 0) {
+        return result
+      }
+      if (result && !lastError) {
+        lastError = result.staleReason || null
+      }
+    } catch (err) {
+      lastError = err.message || String(err)
+    }
+  }
+
+  logDebug('all-cache-sources-exhausted', { error: lastError, branch })
+
+  // No cached rates available from any backend source.  Return a controlled
+  // empty response — the UI shows a loading state, and the backend's
+  // background sync will populate the cache.  We do NOT fall back to a direct
+  // provider call from the browser (that would expose provider credentials and
+  // reintroduce cross-browser CORS/network inconsistencies).
+  return {
+    rates: [],
+    stale: true,
+    staleTimestamp: false,
+    staleReason: lastError || 'No cached rates available — background sync in progress',
+    providerTimestamp: null,
+    source: 'unavailable',
+  }
+}
+
+export { loadBranches, loadRates, normalizeRateData, loadCachedRates }

@@ -66,7 +66,7 @@ export const useForexStore = create(
             changedCurrencies: changed,
             lastUpdated: new Date().toISOString(),
             staleData: showStaleBanner,
-            staleReason: showStaleBanner ? (staleReason || 'Provider timestamp is outdated. Rates are current.') : null,
+            staleReason: showStaleBanner ? (staleReason || 'Live') : null,
             providerTimestamp: providerTimestamp || null,
             rates: toLegacyRates(safeRatesData),
           })
@@ -90,6 +90,7 @@ export const useForexStore = create(
         })),
 
       setSearchQuery: (q) => set({ searchQuery: q }),
+      setRateView: (view) => set({ rateView: view }),
 
       addAlert: (alert) =>
         set((state) => ({ alerts: [...state.alerts, alert] })),
@@ -99,6 +100,7 @@ export const useForexStore = create(
       partialize: (state) => ({
         selectedBranch: state.selectedBranch,
         favorites: state.favorites,
+        rateView: state.rateView,
       }),
     },
   ),

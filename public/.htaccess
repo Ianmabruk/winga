@@ -1,6 +1,15 @@
 RewriteEngine On
 RewriteBase /
 
+# Force HTTPS — mobile browsers loading the site over HTTP will block
+# cross-origin HTTPS fetch requests (mixed content). Redirect all HTTP
+# traffic to HTTPS and enable HSTS for mobile browser compliance.
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# HSTS — enforce HTTPS for 6 months including subdomains
+Header always set Strict-Transport-Security "max-age=15768000; includeSubDomains" env=HTTPS
+
 # Prevent caching of HTML and API responses (Chrome fix)
 <FilesMatch "\.(html|php|json)$">
   Header set Cache-Control "no-cache, no-store, must-revalidate"
@@ -22,8 +31,15 @@ RewriteBase /
 
 RewriteRule ^index\.html$ - [L]
 
+# SPA fallback — exclude /api/ routes, existing files, and directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^ index.html [QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule . /index.html [L]
 
 ErrorDocument 404 /index.html

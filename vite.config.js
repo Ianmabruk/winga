@@ -20,7 +20,8 @@ function ensureHtaccess() {
     [/^\s*RewriteRule\s+\^index\\\.html\$\s+-\s+\[L\]\s*$/m, 'RewriteRule ^index\\.html$ - [L]'],
     [/^\s*RewriteCond\s+%\{REQUEST_FILENAME\}\s+!-f\s*$/m, 'RewriteCond %{REQUEST_FILENAME} !-f'],
     [/^\s*RewriteCond\s+%\{REQUEST_FILENAME\}\s+!-d\s*$/m, 'RewriteCond %{REQUEST_FILENAME} !-d'],
-    [/^\s*RewriteRule\s+.\s+\/index\.html\s+\[L\]\s*$/m, 'RewriteRule . /index.html [L]'],
+    [/^\s*RewriteCond\s+%\{REQUEST_URI\}\s+!?\^\/api\/\s*$/m, 'RewriteCond %{REQUEST_URI} !^/api/'],
+    [/^\s*RewriteRule\s+\^?\s+\/?index\.html\s+\[QSA?,?L\]\s*$/m, 'RewriteRule ^ index.html [QSA,L]'],
     [/^\s*ErrorDocument\s+404\s+\/index\.html\s*$/m, 'ErrorDocument 404 /index.html'],
   ]
 
@@ -55,9 +56,29 @@ function ensureHtaccess() {
   }
 }
 
+function cssBeforeJs() {
+  return {
+    name: 'css-before-js',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const cssMatch = html.match(/<link rel="stylesheet"[^>]*>\n?/)
+      const scriptMatch = html.match(/<script type="module"[^>]*>\n?/)
+      if (!cssMatch || !scriptMatch) return html
+      const cssTag = cssMatch[0]
+      const scriptTag = scriptMatch[0]
+      return html
+        .replace(cssTag, '')
+        .replace(scriptTag, cssTag + scriptTag)
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), ensureHtaccess()],
+  plugins: [react(), ensureHtaccess(), cssBeforeJs()],
   base: '/',
+  build: {
+    cssCodeSplit: true,
+  },
   server: {
     proxy: {
       '/api': {

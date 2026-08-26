@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
-import { http } from '../../lib/http'
+import { http, API_URL } from '../../lib/http'
 
-const WINGA_RATES_ENDPOINT =
-  'https://forex.wingaforex.co.tz/api/method/forex_bureau.vsd_forex_bureau.doctype.branch.api.get_exchange_rates'
+// Use our backend proxy for diagnostics to avoid direct browser requests to Winga.
+const WINGA_RATES_ENDPOINT = `${API_URL}/api/winga-rates.php`
 
 const STALE_THRESHOLD_MS = 60 * 60 * 1000
 const DEFAULT_BRANCH = 'HEAD OFFICE'

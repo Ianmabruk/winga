@@ -1,9 +1,13 @@
-import HeroSection from '../components/landing/HeroSection'
+import { lazy, Suspense } from 'react'
 import RatesSection from '../components/landing/RatesSection'
-import CalculatorSection from '../components/landing/CalculatorSection'
-import WhyChooseUsSection from '../components/landing/WhyChooseUsSection'
-import ContactSection from '../components/landing/ContactSection'
+import HeroSection from '../components/landing/HeroSection'
 import Seo from '../components/Seo'
+
+const CalculatorSection = lazy(() => import('../components/landing/CalculatorSection'))
+const WhyChooseUsSection = lazy(() => import('../components/landing/WhyChooseUsSection'))
+const ContactSection = lazy(() => import('../components/landing/ContactSection'))
+
+const SectionFallback = () => null
 
 export default function HomePage() {
   return (
@@ -15,9 +19,15 @@ export default function HomePage() {
       />
       <HeroSection />
       <RatesSection />
-      <CalculatorSection compact />
-      <WhyChooseUsSection compact />
-      <ContactSection compact />
+      <Suspense fallback={<SectionFallback />}>
+        <CalculatorSection compact />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <WhyChooseUsSection compact />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <ContactSection compact />
+      </Suspense>
     </div>
   )
 }

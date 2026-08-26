@@ -1,9 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForexStore } from '../store/useForexStore'
 import { loadRates } from '../services/wingaForexService'
 
 const REFRESH_INTERVAL = Number(import.meta.env.VITE_APP_REFRESH_INTERVAL) || 15_000
+
+const inFlightPromises = new Map()
+
+const getInitialRates = () => {
+  if (typeof window === 'undefined') return undefined
+  const initial = window.__INITIAL_RATES__
+  if (!initial || !Array.isArray(initial.rates) || initial.rates.length === 0) return undefined
+  return {
+    rates: initial.rates,
+    stale: initial.stale || false,
+    staleTimestamp: false,
+    staleReason: initial.stale ? 'Showing cached snapshot from server' : null,
+    providerTimestamp: initial.providerTimestamp || null,
+    source: initial.source || 'bootstrap',
+    lastUpdated: initial.updated_at || null,
+  }
+}
 
 export const useRates = () => {
   const { selectedBranch, setRatesData } = useForexStore()
@@ -12,73 +29,69 @@ export const useRates = () => {
   const query = useQuery({
     queryKey: ['live-rates', branchName],
     queryFn: async () => {
-      logDebug('useRates-fetch', {
-        branch: branchName,
-        url: `${import.meta.env.VITE_API_URL || ''}/api/rates/live?branch_name=${encodeURIComponent(branchName)}`,
-      })
-      const result = await loadRates(branchName)
-      const rates = result?.rates || []
-      logDebug('useRates-receive', {
-        branch: branchName,
-        count: rates?.length || 0,
-        status: 'success',
-        isProviderStale: result?.stale || false,
-        staleTimestamp: result?.staleTimestamp || false,
-        staleReason: result?.staleReason || null,
-        lastUpdate: new Date().toISOString(),
-      })
-      return { rates, stale: result?.stale || false, staleTimestamp: result?.staleTimestamp || false, staleReason: result?.staleReason || null, providerTimestamp: result?.providerTimestamp || null }
+      const key = `rates:${branchName}`
+
+      if (inFlightPromises.has(key)) {
+        return inFlightPromises.get(key)
+      }
+
+      const promise = loadRates(branchName)
+        .then((result) => {
+          inFlightPromises.delete(key)
+          const rates = result?.rates || []
+          return {
+            rates,
+            stale: result?.stale || false,
+            staleTimestamp: result?.staleTimestamp || false,
+            staleReason: result?.staleReason || null,
+            providerTimestamp: result?.providerTimestamp || null,
+            source: result?.source || 'cache',
+            lastUpdated: result?.lastUpdated || null,
+          }
+        })
+        .catch((err) => {
+          inFlightPromises.delete(key)
+          throw err
+        })
+
+      inFlightPromises.set(key, promise)
+      return promise
     },
-    staleTime: 0,
+    staleTime: REFRESH_INTERVAL,
     gcTime: 30_000,
-    retry: 2,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
+    retry: 0,
     refetchInterval: REFRESH_INTERVAL,
-    refetchIntervalInBackground: false,
+    refetchIntervalInBackground: true,
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: true,
     throwOnError: false,
+    initialData: getInitialRates(),
   })
 
+  const prevDataRef = useRef(query.data)
+
   useEffect(() => {
-    if (query.data?.rates && Array.isArray(query.data.rates)) {
-      setRatesData(query.data.rates, query.data.stale || false, query.data.staleReason || null, query.data.providerTimestamp || null, query.data.staleTimestamp || false)
+    if (query.isSuccess && query.data?.rates && Array.isArray(query.data.rates)) {
+      const prev = prevDataRef.current
+      if (prev?.rates !== query.data.rates) {
+        setRatesData(
+          query.data.rates,
+          query.data.stale || false,
+          query.data.staleReason || null,
+          query.data.providerTimestamp || null,
+          query.data.staleTimestamp || false,
+        )
+      }
+      prevDataRef.current = query.data
     }
-  }, [query.data, setRatesData])
+  }, [query.isSuccess, query.data, setRatesData])
 
-  // Chrome bfcache (back-forward cache) fix: when Chrome restores a page from
-  // bfcache, React Query's refetchInterval timer is paused and the component
-  // does NOT remount. Without this listener, Chrome shows stale data from the
-  // last visit until the user manually refreshes. Firefox/Safari handle this
-  // more aggressively via refetchOnWindowFocus.
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handlePageshow = (event) => {
-      if (event.persisted) {
-        logDebug('bfcache-restore', { branch: branchName })
-        query.refetch()
-      }
+    if (query.isError && query.error) {
+      logDebug('fetch-error', { message: query.error?.message || String(query.error) })
     }
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        logDebug('tab-visible', { branch: branchName, isFetching: query.isFetching })
-        if (!query.isFetching) {
-          query.refetch()
-        }
-      }
-    }
-
-    window.addEventListener('pageshow', handlePageshow)
-    document.addEventListener('visibilitychange', handleVisibility)
-
-    return () => {
-      window.removeEventListener('pageshow', handlePageshow)
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
-  }, [query, branchName])
+  }, [query.isError, query.error])
 
   return query
 }
